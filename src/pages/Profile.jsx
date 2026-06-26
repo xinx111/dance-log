@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { getStats, getUserProfile, saveUserProfile } from '../db'
+import { getStats, getUserProfile, saveUserProfile, clearAllRecords } from '../db'
 import { exportData, importData, getLastBackupTime } from '../utils/sync'
 import { formatDate } from '../utils/format'
 
@@ -14,6 +14,9 @@ export default function Profile() {
   const [importResult, setImportResult] = useState(null)
   const [exporting, setExporting] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const [clearConfirmText, setClearConfirmText] = useState('')
+  const [clearing, setClearing] = useState(false)
   const fileInputRef = useRef(null)
   const avatarInputRef = useRef(null)
 
@@ -76,6 +79,19 @@ export default function Profile() {
     } catch (err) { setImportResult({ success: false, message: err.message }) }
     setImporting(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function handleClearAll() {
+    setClearing(true)
+    try {
+      await clearAllRecords()
+      await loadData()
+      setShowClearConfirm(false)
+      setClearConfirmText('')
+    } catch (err) {
+      alert('清除失败，请重试')
+    }
+    setClearing(false)
   }
 
   const avatarContent = profile.avatar
@@ -193,7 +209,46 @@ export default function Profile() {
             {importResult.success ? `✓ 成功导入 ${importResult.count} 条记录` : `✗ 导入失败: ${importResult.message}`}
           </div>
         )}
+
+        <div className="border-t border-gray-50 pt-2 mt-2">
+          <button onClick={() => setShowClearConfirm(true)}
+            className="w-full flex items-center gap-3 py-3 rounded-xl px-2 -mx-2 transition-colors text-red-500 active:bg-red-50">
+            <div className="text-xl w-8 text-center">🗑️</div>
+            <div className="flex-1 text-left">
+              <p className="font-medium text-sm">清除所有数据</p>
+              <p className="text-xs text-gray-400">删除全部舞蹈记录，不可恢复</p>
+            </div>
+          </button>
+        </div>
       </div>
+
+      {/* 清除确认弹窗 */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl animate-scale-in">
+            <div className="text-center mb-4">
+              <div className="text-4xl mb-3">⚠️</div>
+              <h3 className="text-lg font-bold text-gray-800 mb-2">清除所有数据</h3>
+              <p className="text-gray-500 text-sm">此操作将删除所有舞蹈记录，不可恢复。<br/>建议先导出备份。</p>
+            </div>
+            <div className="mb-4">
+              <label className="text-sm font-medium text-gray-700 mb-1.5 block">请输入 <strong className="text-red-500">确认</strong> 以继续</label>
+              <input type="text" value={clearConfirmText} onChange={e => setClearConfirmText(e.target.value)}
+                placeholder="输入" className="input-field" />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => { setShowClearConfirm(false); setClearConfirmText('') }}
+                className="flex-1 bg-gray-100 text-gray-700 font-medium rounded-xl py-3">
+                取消
+              </button>
+              <button onClick={handleClearAll} disabled={clearConfirmText !== '确认' || clearing}
+                className="flex-1 bg-red-500 text-white font-medium rounded-xl py-3 disabled:opacity-50 transition-colors">
+                {clearing ? '清除中...' : '确认清除'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 关于 */}
       <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">

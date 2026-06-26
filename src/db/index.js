@@ -197,4 +197,9 @@ export async function saveUserProfile(profile) {
   return setSetting(USER_PROFILE_KEY, profile)
 }
 
+/** 清空所有舞蹈记录（保留用户资料和设置） */
+export async function clearAllRecords() {
+  await db.danceRecords.clear()
+}
+
 export default db
