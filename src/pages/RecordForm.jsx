@@ -71,14 +71,23 @@ export default function RecordForm() {
     setVideoPreview(previewUrl)
     setSelectedFile(file)
 
-    // 获取视频时长
+    // 获取视频时长 - 用独立的 blob URL，不影响预览
+    const tempUrl = URL.createObjectURL(file)
     const video = document.createElement('video')
     video.preload = 'metadata'
     video.onloadedmetadata = () => {
-      handleChange('duration', Math.round(video.duration))
-      URL.revokeObjectURL(video.src)
+      const dur = video.duration
+      if (dur && isFinite(dur) && dur > 0) {
+        handleChange('duration', Math.round(dur))
+      } else {
+        handleChange('duration', 0)
+      }
+      URL.revokeObjectURL(tempUrl)
     }
-    video.src = previewUrl
+    video.onerror = () => {
+      URL.revokeObjectURL(tempUrl)
+    }
+    video.src = tempUrl
   }
 
   const handleSave = async () => {
