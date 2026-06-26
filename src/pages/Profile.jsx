@@ -184,4 +184,64 @@ export default function Profile() {
       <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 space-y-1">
         <h3 className="text-sm font-medium text-gray-500 mb-2">数据管理</h3>
         <MenuItem icon="📤" label="导出备份" sub={lastBackup ? `上次备份: ${formatDate(lastBackup)}` : '尚未备份'} onClick={handleExport} loading={exporting} />
-        <MenuItem icon="📥" label="导入备份" sub="从备份文件恢复数据" onClick={() 
+        <MenuItem icon="📥" label="导入备份" sub="从备份文件恢复数据" onClick={() => fileInputRef.current?.click()} loading={importing} />
+        <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+        {importResult && (
+          <div className={`mt-2 text-sm px-3 py-2 rounded-lg ${
+            importResult.success ? 'bg-dpink-50 text-dpink-400' : 'bg-red-50 text-red-500'
+          }`}>
+            {importResult.success ? `✓ 成功导入 ${importResult.count} 条记录` : `✗ 导入失败: ${importResult.message}`}
+          </div>
+        )}
+      </div>
+
+      {/* 关于 */}
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
+        <button onClick={() => setShowAbout(!showAbout)} className="w-full flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-dpink-400">
+  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+</svg>
+            <div className="text-left">
+              <p className="font-medium text-gray-800">关于舞迹</p>
+              <p className="text-xs text-gray-400">版本 1.0.0</p>
+            </div>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+               className={`w-5 h-5 text-gray-400 transition-transform ${showAbout ? 'rotate-180' : ''}`}>
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+        {showAbout && (
+          <div className="mt-3 pt-3 border-t border-gray-50 text-sm text-gray-500 space-y-2 animate-slide-up">
+            <p>舞迹 DanceLog 是一款帮助舞蹈爱好者记录练习视频的应用。</p>
+            <p>通过分类、日历、数据统计和成长总结，看到自己的进步轨迹。</p>
+            <p className="text-xs text-gray-400 mt-2">技术栈: React + Vite + Tailwind + IndexedDB</p>
+          </div>
+        )}
+      </div>
+
+      <div className="text-center text-xs text-gray-400 pb-4">舞迹 DanceLog © 2026</div>
+    </div>
+  )
+}
+
+function MenuItem({ icon, label, sub, onClick, loading }) {
+  return (
+    <button onClick={onClick} disabled={loading}
+      className="w-full flex items-center gap-3 py-3 active:bg-gray-50 rounded-xl px-2 -mx-2 transition-colors">
+      <div className="text-xl w-8 text-center">{icon}</div>
+      <div className="flex-1 text-left">
+        <p className="font-medium text-gray-800 text-sm">{label}</p>
+        {sub && <p className="text-xs text-gray-400">{sub}</p>}
+      </div>
+      {loading ? (
+        <div className="w-4 h-4 border-2 border-gray-300 border-t-dpink-400 rounded-full animate-spin" />
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-gray-300">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      )}
+    </button>
+  )
+}

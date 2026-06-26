@@ -221,4 +221,52 @@ export default function RecordForm() {
                   : 'border-gray-100 bg-gray-50 text-gray-500'
               }`}
             >
-              <div className="text-2xl mb-1">🌟</di
+              <div className="text-2xl mb-1">🌟</div>
+              <span className="font-bold text-sm">跳得很好</span>
+            </button>
+            <button
+              onClick={() => handleChange('category', 'needs-work')}
+              className={`py-4 rounded-2xl border-2 text-center transition-all ${
+                form.category === 'needs-work'
+                  ? 'border-dpurple-400 bg-dpurple-50 text-dpurple-400'
+                  : 'border-gray-100 bg-gray-50 text-gray-500'
+              }`}
+            >
+              <div className="text-2xl mb-1">🔥</div>
+              <span className="font-bold text-sm">还需要努力</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-700 mb-1.5 block">备注</label>
+          <textarea value={form.notes} onChange={e => handleChange('notes', e.target.value)}
+            placeholder="记录一下今天的感受吧～" rows={3} className="input-field resize-none" />
+        </div>
+      </div>
+
+      {/* 保存按钮 - 粉紫渐变 */}
+      <div className="px-4 mt-6 pb-8">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="w-full bg-gradient-to-r from-dpink-400 to-dpurple-400 text-white font-bold text-lg py-4 rounded-2xl shadow-lg shadow-dpink-200 active:scale-[0.98] transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          {saving ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              保存中...
+            </>
+          ) : (
+            <>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-5 h-5">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              保存
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}

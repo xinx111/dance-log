@@ -185,4 +185,16 @@ export async function setSetting(key, value) {
   return db.settings.put({ key, value })
 }
 
-// ===== 用户资
+// ===== 用户资料 =====
+const USER_PROFILE_KEY = 'user_profile'
+
+export async function getUserProfile() {
+  const profile = await getSetting(USER_PROFILE_KEY)
+  return profile || { name: '舞者', avatar: '' }
+}
+
+export async function saveUserProfile(profile) {
+  return setSetting(USER_PROFILE_KEY, profile)
+}
+
+export default db

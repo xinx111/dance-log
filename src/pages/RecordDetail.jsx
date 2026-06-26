@@ -157,4 +157,24 @@ export default function RecordDetail() {
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl animate-scale-in">
-        
+            <div className="text-center">
+              <div className="text-4xl mb-3">😢</div>
+              <h3 className="text-lg font-bold text-gray-800 mb-2">确认删除</h3>
+              <p className="text-gray-500 text-sm">删除后无法恢复，确定要删除这条记录吗？</p>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 bg-gray-100 text-gray-700 font-medium rounded-xl py-3">
+                取消
+              </button>
+              <button onClick={handleDelete}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl py-3 transition-colors">
+                删除
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
