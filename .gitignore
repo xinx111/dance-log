@@ -1,0 +1,8 @@
+node_modules
+dist
+.capability
+android
+ios
+*.local
+.DS_Store
+*.log
