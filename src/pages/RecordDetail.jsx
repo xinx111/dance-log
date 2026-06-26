@@ -149,6 +149,17 @@ export default function RecordDetail() {
         </div>
       )}
 
+      {/* AI 分析按钮 */}
+      <button
+        onClick={() => navigate(`/record/${id}/analyze`, { state: { record } })}
+        className="w-full bg-gradient-to-r from-dpink-400 to-dpurple-400 text-white font-bold text-lg py-4 rounded-2xl shadow-lg shadow-dpink-200 mb-4 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-5 h-5">
+          <path d="M12 2l2.4 7.2L22 9l-6 4.8L17.6 22 12 17l-5.6 5L8 13.8 2 9l7.6-.2z" />
+        </svg>
+        AI 动作分析
+      </button>
+
       <div className="text-center text-xs text-gray-400 mt-6">
         创建于 {formatDate(record.createdAt)}
       </div>

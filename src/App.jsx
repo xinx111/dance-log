@@ -8,6 +8,7 @@ import RecordDetail from './pages/RecordDetail'
 import CalendarPage from './pages/CalendarPage'
 import Summary from './pages/Summary'
 import Profile from './pages/Profile'
+import AIAnalyze from './pages/AIAnalyze'
 
 const pages = [
   { path: '/', name: '首页', icon: HomeIcon },
@@ -35,6 +36,7 @@ function AppContent() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/summary" element={<Summary />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/record/:id/analyze" element={<AIAnalyze />} />
         </Routes>
       </div>
       {showNav && (
