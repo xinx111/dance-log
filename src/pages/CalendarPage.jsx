@@ -2,18 +2,22 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getRecordsByMonth, getStreak } from '../db'
 import { getMonthDays, formatDate, formatMonth, formatDuration } from '../utils/format'
+import { getVideoUri } from '../utils/storage'
 
 export default function CalendarPage() {
   const navigate = useNavigate()
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
-  const [practiceDates, setPracticeDates] = useState(new Set())
+  const [practiceCount, setPracticeCount] = useState({})        // { "Mon DD YYYY": count }
+  const [maxCount, setMaxCount] = useState(0)                   // 本月最高单日练习数
   const [selectedDate, setSelectedDate] = useState(null)
   const [dayRecords, setDayRecords] = useState([])
   const [streak, setStreak] = useState(0)
   const [loading, setLoading] = useState(true)
   const [monthStats, setMonthStats] = useState({ count: 0, days: 0 })
+  const [playingVideoId, setPlayingVideoId] = useState(null)
+  const [videoSrcs, setVideoSrcs] = useState({})
 
   useEffect(() => { loadMonthData() }, [year, month])
 
@@ -21,9 +25,16 @@ export default function CalendarPage() {
     setLoading(true)
     try {
       const records = await getRecordsByMonth(year, month)
-      const dates = new Set(records.map(r => new Date(r.date).toDateString()))
-      setPracticeDates(dates)
-      setMonthStats({ count: records.length, days: dates.size })
+      // 统计每天练习数量
+      const countMap = {}
+      records.forEach(r => {
+        const key = new Date(r.date).toDateString()
+        countMap[key] = (countMap[key] || 0) + 1
+      })
+      setPracticeCount(countMap)
+      const max = Math.max(...Object.values(countMap), 0)
+      setMaxCount(max)
+      setMonthStats({ count: records.length, days: Object.keys(countMap).length })
       const s = await getStreak()
       setStreak(s)
       if (selectedDate) {
@@ -38,10 +49,38 @@ export default function CalendarPage() {
     if (!day) return
     const date = new Date(year, month - 1, day)
     setSelectedDate(date)
+    setPlayingVideoId(null)
     try {
       const records = await getRecordsByMonth(year, month)
       setDayRecords(records.filter(r => new Date(r.date).toDateString() === date.toDateString()))
     } catch (err) { console.error(err) }
+  }
+
+  async function handlePlayVideo(record) {
+    if (playingVideoId === record.id) {
+      setPlayingVideoId(null)
+      return
+    }
+    setPlayingVideoId(record.id)
+    if (!videoSrcs[record.id] && record.videoUrl) {
+      const uri = await getVideoUri(record.videoUrl)
+      setVideoSrcs(prev => ({ ...prev, [record.id]: uri }))
+    }
+  }
+
+  /** 根据练习量返回热力颜色 class */
+  function getHeatColor(dateStr, isSelected, isToday) {
+    if (isSelected) return 'bg-dpink-400 text-white shadow-md'
+    if (isToday && !practiceCount[dateStr]) return 'bg-dpink-50 text-dpink-400'
+
+    const count = practiceCount[dateStr] || 0
+    if (count === 0) return 'hover:bg-gray-50 text-gray-700'
+
+    const ratio = maxCount > 0 ? count / maxCount : 0
+    if (ratio >= 0.8) return 'bg-dpurple-400 text-white'
+    if (ratio >= 0.5) return 'bg-dpurple-300 text-white'
+    if (ratio >= 0.3) return 'bg-dpurple-200 text-dpurple-700'
+    return 'bg-dpurple-100 text-dpurple-500'
   }
 
   const days = getMonthDays(year, month)
@@ -53,7 +92,7 @@ export default function CalendarPage() {
       <h1 className="text-2xl font-bold text-gray-800 mb-1">练习日历</h1>
       <p className="text-gray-400 text-sm mb-4">查看你的舞蹈足迹</p>
 
-      {/* 连续打卡 - 粉色 */}
+      {/* 连续打卡 */}
       <div className="bg-dpink-200 rounded-2xl p-5 text-white shadow-lg shadow-dpink-200/40 flex items-center justify-between mb-4">
         <div>
           <p className="text-white/80 text-sm">连续打卡</p>
@@ -96,31 +135,29 @@ export default function CalendarPage() {
             const date = new Date(year, month - 1, day)
             const dateStr = date.toDateString()
             const isToday = dateStr === today.toDateString()
-            const hasPractice = practiceDates.has(dateStr)
             const isSelected = selectedDate?.toDateString() === dateStr
 
             return (
               <button key={day} onClick={() => handleDateClick(day)}
-                className={`aspect-square rounded-xl flex flex-col items-center justify-center relative transition-all ${
-                  isSelected ? 'bg-dpink-400 text-white shadow-md' :
-                  hasPractice ? 'bg-dpurple-100 text-dpurple-400' :
-                  isToday ? 'bg-dpink-50 text-dpink-400' :
-                  'hover:bg-gray-50 text-gray-700'
-                }`}>
+                className={`aspect-square rounded-xl flex flex-col items-center justify-center relative transition-all ${getHeatColor(dateStr, isSelected, isToday)}`}>
                 <span className="text-sm font-medium">{day}</span>
-                {hasPractice && !isSelected && (
-                  <div className={`w-1.5 h-1.5 rounded-full mt-0.5 ${
-                    isToday ? 'bg-dpink-400' : 'bg-dpurple-400'
-                  }`} />
-                )}
-                {isToday && !hasPractice && !isSelected && (
-                  <div className="w-1.5 h-1.5 rounded-full mt-0.5 bg-dpink-400" />
-                )}
               </button>
             )
           })}
         </div>
       </div>
+
+      {/* 热力图例 */}
+      {maxCount > 0 && (
+        <div className="flex items-center justify-center gap-2 mt-3 text-xs text-gray-400">
+          <span>少</span>
+          <div className="w-4 h-4 rounded bg-dpurple-100" />
+          <div className="w-4 h-4 rounded bg-dpurple-200" />
+          <div className="w-4 h-4 rounded bg-dpurple-300" />
+          <div className="w-4 h-4 rounded bg-dpurple-400" />
+          <span>多</span>
+        </div>
+      )}
 
       {/* 选中日期的记录 */}
       {selectedDate && (
@@ -138,25 +175,49 @@ export default function CalendarPage() {
               </button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {dayRecords.map(record => (
-                <div key={record.id} onClick={() => navigate(`/record/${record.id}`)}
-                  className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-transform cursor-pointer border border-gray-50">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${
-                    record.category === 'good' ? 'bg-dpink-100' : 'bg-dpurple-100'
-                  }`}>
-                    {record.category === 'good' ? '🌟' : '🔥'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-800 truncate">{record.songName || '未命名'}</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-                      {record.danceType && <span>{record.danceType}</span>}
-                      {record.duration > 0 && <span>· {formatDuration(record.duration)}</span>}
+                <div key={record.id}>
+                  <div
+                    onClick={() => handlePlayVideo(record)}
+                    className="bg-white rounded-xl shadow-sm border border-gray-50 overflow-hidden active:scale-[0.99] transition-transform cursor-pointer"
+                  >
+                    <div className="p-4 flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${
+                        record.category === 'good' ? 'bg-dpink-100' : 'bg-dpurple-100'
+                      }`}>
+                        {record.category === 'good' ? '🌟' : '🔥'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-800 truncate">{record.songName || '未命名'}</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
+                          {record.danceType && <span>{record.danceType}</span>}
+                          {record.duration > 0 && <span>· {formatDuration(record.duration)}</span>}
+                        </div>
+                      </div>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+                        className={`w-5 h-5 transition-transform ${playingVideoId === record.id ? 'rotate-180 text-dpink-400' : 'text-gray-300'}`}>
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
                     </div>
+
+                    {playingVideoId === record.id && (
+                      <div className="border-t border-gray-50 animate-slide-up">
+                        {videoSrcs[record.id] ? (
+                          <video src={videoSrcs[record.id]} controls
+                            className="w-full max-h-64 object-contain bg-black" autoPlay />
+                        ) : record.videoUrl ? (
+                          <div className="flex items-center justify-center h-32 bg-gray-50 text-gray-400 text-sm">
+                            加载中...
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center h-20 bg-gray-50 text-gray-400 text-sm">
+                            暂无视频
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-gray-300">
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
                 </div>
               ))}
             </div>
@@ -164,11 +225,8 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* 图例 - 粉紫色 */}
+      {/* 图例 */}
       <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-400">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-dpurple-100" />已练习
-        </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-dpink-400" />选中
         </div>

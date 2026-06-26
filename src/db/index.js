@@ -185,6 +185,64 @@ export async function setSetting(key, value) {
   return db.settings.put({ key, value })
 }
 
+/**
+ * 按时间范围获取统计
+ * @param {'week'|'month'|'year'} range
+ */
+export async function getStatsByRange(range = 'month') {
+  const records = await db.danceRecords.toArray()
+  const now = new Date()
+  let start
+
+  if (range === 'week') {
+    const dayOfWeek = now.getDay()
+    start = new Date(now)
+    start.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    start.setHours(0, 0, 0, 0)
+  } else if (range === 'year') {
+    start = new Date(now.getFullYear(), 0, 1)
+  } else {
+    start = new Date(now.getFullYear(), now.getMonth(), 1)
+  }
+
+  const rangeRecords = records.filter(r => new Date(r.date) >= start)
+  const practiceDays = new Set(rangeRecords.map(r => new Date(r.date).toDateString())).size
+  const goodCount = rangeRecords.filter(r => r.category === 'good').length
+  const needsWorkCount = rangeRecords.filter(r => r.category === 'needs-work').length
+  const totalDuration = rangeRecords.reduce((sum, r) => sum + (r.duration || 0), 0)
+  const totalRecords = records.length
+
+  const danceTypeDist = {}
+  rangeRecords.forEach(r => {
+    if (r.danceType) danceTypeDist[r.danceType] = (danceTypeDist[r.danceType] || 0) + 1
+  })
+
+  // 连续练习天数
+  const sortedDates = [...new Set(records.map(r => new Date(r.date).toDateString()))]
+    .sort((a, b) => new Date(b) - new Date(a))
+  let streak = 0
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  for (let i = 0; i < sortedDates.length; i++) {
+    const expected = new Date(today)
+    expected.setDate(expected.getDate() - i)
+    if (sortedDates[i] === expected.toDateString()) streak++
+    else break
+  }
+
+  return {
+    totalRecords,
+    rangeRecords: rangeRecords.length,
+    practiceDays,
+    goodCount,
+    needsWorkCount,
+    totalDuration,
+    danceTypeDist,
+    streak,
+    rangeLabel: range === 'week' ? '本周' : range === 'year' ? '本年' : '本月',
+  }
+}
+
 // ===== 用户资料 =====
 const USER_PROFILE_KEY = 'user_profile'
 
