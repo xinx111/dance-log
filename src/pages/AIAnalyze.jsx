@@ -55,17 +55,42 @@ export default function AIAnalyze() {
 
       if (!res.ok) {
         const text = await res.text()
-        throw new Error(text.slice(0, 200))
+        // 尽量提取友好的错误信息
+        let msg = '分析请求失败'
+        try {
+          const errJson = JSON.parse(text)
+          msg = errJson.detail || errJson.error || errJson.message || msg
+        } catch {
+          if (text.includes('connect') || text.includes('ECONNREFUSED')) msg = '无法连接到服务器，请确认服务已启动'
+          else if (text.includes('timeout') || text.includes('timed out')) msg = '请求超时，视频可能过大或网络不稳定'
+          else if (text.includes('500')) msg = '服务器内部错误，请查看后端日志'
+          else msg = text.slice(0, 100)
+        }
+        throw new Error(msg)
       }
 
       const data = await res.json()
       if (data.error) {
-        setError(data.error)
+        // 把 `API 调用失败: ...` 简化为用户看得懂的话
+        const errMsg = data.error
+        if (errMsg.includes('api_key') || errMsg.includes('API Key') || errMsg.includes('401')) {
+          setError('请先在服务器 .env 文件中配置正确的 Qwen API Key')
+        } else if (errMsg.includes('timeout') || errMsg.includes('超时')) {
+          setError('AI 分析超时，视频可能过长，建议控制在 2 分钟以内')
+        } else if (errMsg.includes('size') || errMsg.includes('large')) {
+          setError('视频文件过大，建议压缩后再试')
+        } else {
+          setError(errMsg.replace('API 调用失败: ', ''))
+        }
       } else {
         setResult(data)
       }
     } catch (err) {
-      setError(err.message || '连接失败，请检查服务器是否启动')
+      if (err.name === 'AbortError') {
+        setError('分析超时，视频可能过长或网络不稳定')
+      } else {
+        setError(err.message || '连接失败，请检查服务器是否启动')
+      }
     }
     setAnalyzing(false)
   }
