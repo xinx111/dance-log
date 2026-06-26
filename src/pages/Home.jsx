@@ -63,7 +63,7 @@ export default function Home() {
                   <p className="text-5xl font-bold mt-1">{goodCount}</p>
                   <p className="text-white/70 text-xs mt-1">个视频</p>
                 </div>
-                <div className="text-6xl">🩰</div>
+                <div className="text-6xl">⭐</div>
               </div>
             </div>
           </div>
