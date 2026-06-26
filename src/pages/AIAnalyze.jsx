@@ -42,11 +42,16 @@ export default function AIAnalyze() {
     const endpoint = mode === 'single' ? '/analyze/single' : '/analyze'
 
     try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 120000)
+
       const res = await fetch(`${AI_API_BASE}${endpoint}`, {
         method: 'POST',
         body: formData,
-        timeout: 120000, // 2 分钟超时
+        signal: controller.signal,
       })
+
+      clearTimeout(timeoutId)
 
       if (!res.ok) {
         const text = await res.text()
