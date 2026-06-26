@@ -260,4 +260,14 @@ export async function clearAllRecords() {
   await db.danceRecords.clear()
 }
 
+/** 获取视频存储统计 */
+export async function getStorageStats() {
+  const records = await db.danceRecords.toArray()
+  const videoRecords = records.filter(r => r.videoUrl)
+  const totalBytes = videoRecords.reduce((sum, r) => sum + (r.fileSize || 0), 0)
+  const withVideo = videoRecords.length
+  const withoutVideo = records.length - withVideo
+  return { totalRecords: records.length, withVideo, withoutVideo, totalBytes }
+}
+
 export default db

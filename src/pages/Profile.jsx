@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { getStats, getUserProfile, saveUserProfile, clearAllRecords } from '../db'
+import { getStats, getUserProfile, saveUserProfile, clearAllRecords, getStorageStats } from '../db'
 import { exportData, importData, getLastBackupTime } from '../utils/sync'
 import { formatDate } from '../utils/format'
 
@@ -10,6 +10,7 @@ export default function Profile() {
   const [editName, setEditName] = useState('')
   const [editAvatar, setEditAvatar] = useState('')
   const [lastBackup, setLastBackup] = useState(null)
+  const [storageStats, setStorageStats] = useState(null)
   const [importing, setImporting] = useState(false)
   const [importResult, setImportResult] = useState(null)
   const [exporting, setExporting] = useState(false)
@@ -24,12 +25,13 @@ export default function Profile() {
 
   async function loadData() {
     try {
-      const [statsData, backupTime, userProfile] = await Promise.all([
-        getStats(), getLastBackupTime(), getUserProfile(),
+      const [statsData, backupTime, userProfile, storage] = await Promise.all([
+        getStats(), getLastBackupTime(), getUserProfile(), getStorageStats(),
       ])
       setStats(statsData)
       setLastBackup(backupTime)
       setProfile(userProfile)
+      setStorageStats(storage)
     } catch (err) { console.error(err) }
   }
 
@@ -193,6 +195,41 @@ export default function Profile() {
               <p className="text-xs text-gray-400">本月打卡</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 存储状态 */}
+      {storageStats && (
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
+          <h3 className="text-sm font-medium text-gray-500 mb-3">📦 存储状态</h3>
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-bold text-dpink-400">
+                {storageStats.withVideo}
+              </p>
+              <p className="text-xs text-gray-400">含视频的记录</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-dpurple-400">
+                {storageStats.totalBytes > 0
+                  ? storageStats.totalBytes >= 1073741824
+                    ? `${(storageStats.totalBytes / 1073741824).toFixed(1)} GB`
+                    : `${(storageStats.totalBytes / 1048576).toFixed(1)} MB`
+                  : '—'}
+              </p>
+              <p className="text-xs text-gray-400">视频占用空间</p>
+            </div>
+          </div>
+          {storageStats.withoutVideo > 0 && (
+            <p className="text-xs text-gray-400 text-center mt-2">
+              另有 {storageStats.withoutVideo} 条无视频的记录未计入
+            </p>
+          )}
+          {storageStats.totalBytes === 0 && storageStats.totalRecords > 0 && (
+            <p className="text-xs text-amber-500 text-center mt-2">
+              部分旧记录的存储空间暂未统计，新录制视频后将自动计算
+            </p>
+          )}
         </div>
       )}
 

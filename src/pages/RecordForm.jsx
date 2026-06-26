@@ -109,6 +109,7 @@ export default function RecordForm() {
       const recordData = {
         ...form,
         videoUrl,
+        fileSize: selectedFile?.size || form.fileSize || 0,
         date: new Date(form.date).getTime(),
       }
 
