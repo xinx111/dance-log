@@ -176,7 +176,7 @@ export default function CalendarPage() {
                       <div className="border-t border-gray-50 animate-slide-up">
                         {videoSrcs[record.id] ? (
                           <video src={videoSrcs[record.id]} controls
-                            className="w-full max-h-64 object-contain bg-black" autoPlay />
+                            className="w-full max-h-64 object-contain bg-black" controls />
                         ) : record.videoUrl ? (
                           <div className="flex items-center justify-center h-32 bg-gray-50 text-gray-400 text-sm">
                             加载中...

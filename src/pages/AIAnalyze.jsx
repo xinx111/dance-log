@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { AI_API_BASE } from '../utils/config'
-import { updateRecord } from '../db'
+import { getRecord, updateRecord } from '../db'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer,
@@ -58,6 +58,21 @@ export default function AIAnalyze() {
     setError('')
     setResult(null)
 
+    // 标记"分析中"
+    try {
+      const existingResults = record?.analysisResults || {}
+      await updateRecord(Number(id), {
+        analysisResults: {
+          ...existingResults,
+          [`${mode}_pending`]: true,
+        },
+        analyzedAt: new Date().toISOString(),
+      })
+    } catch (e) {
+      console.error('标记分析状态失败:', e)
+    }
+
+    // ===== 以下用 .then() 确保即使页面返回，请求仍在后台执行 =====
     const formData = new FormData()
 
     if (mode === 'single') {
@@ -67,34 +82,29 @@ export default function AIAnalyze() {
       formData.append('teacher_video', teacherFile)
     }
 
-    // API Key 从环境变量读取，前端不传
     const endpoint = mode === 'single' ? '/analyze/single' : '/analyze'
-
-    // 对比分析需要更长的超时时间
     const timeoutMs = mode === 'compare' ? 300000 : 120000
 
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+    // 不 await，让请求在后台跑，页面返回也不中断
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
-      const res = await fetch(`${AI_API_BASE}${endpoint}`, {
-        method: 'POST',
-        body: formData,
-        signal: controller.signal,
-      })
-
+    fetch(`${AI_API_BASE}${endpoint}`, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    }).then(async (res) => {
       clearTimeout(timeoutId)
 
       if (!res.ok) {
         const text = await res.text()
-        // 尽量提取友好的错误信息
         let msg = '分析请求失败'
         try {
           const errJson = JSON.parse(text)
           msg = errJson.detail || errJson.error || errJson.message || msg
         } catch {
           if (text.includes('connect') || text.includes('ECONNREFUSED')) msg = '无法连接到服务器，请确认服务已启动'
-          else if (text.includes('timeout') || text.includes('timed out')) msg = '请求超时，视频可能过大或网络不稳定'
+          else if (text.includes('timeout') || text.includes('timed out')) msg = '请求超时，视频可能过长或网络不稳定'
           else if (text.includes('500')) msg = '服务器内部错误，请查看后端日志'
           else msg = text.slice(0, 100)
         }
@@ -102,42 +112,27 @@ export default function AIAnalyze() {
       }
 
       const data = await res.json()
-      if (data.error) {
-        // 把 `API 调用失败: ...` 简化为用户看得懂的话
-        const errMsg = data.error
-        if (errMsg.includes('api_key') || errMsg.includes('API Key') || errMsg.includes('401')) {
-          setError('请先在服务器 .env 文件中配置正确的 Qwen API Key')
-        } else if (errMsg.includes('timeout') || errMsg.includes('超时')) {
-          setError('AI 分析超时，视频可能过长，建议控制在 2 分钟以内')
-        } else if (errMsg.includes('size') || errMsg.includes('large')) {
-          setError('视频文件过大，建议压缩后再试')
-        } else {
-          setError(errMsg.replace('API 调用失败: ', ''))
-        }
-      } else {
-        setResult(data)
-        // 保存分析结果到数据库（按模式区分，互不覆盖）
-        try {
-          const existingResults = record?.analysisResults || {}
-          await updateRecord(Number(id), {
-            analysisResults: {
-              ...existingResults,
-              [mode]: data,
-            },
-            analyzedAt: new Date().toISOString(),
-          })
-        } catch (e) {
-          console.error('保存分析结果失败:', e)
-        }
-      }
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        setError('分析超时，视频可能过长或网络不稳定')
-      } else {
-        setError(err.message || '连接失败，请检查服务器是否启动')
-      }
-    }
-    setAnalyzing(false)
+      if (data.error) throw new Error(data.error)
+
+      // 保存结果到数据库（页面已关闭也能写 IndexedDB）
+      const currentRecord = await getRecord(Number(id))
+      const results = currentRecord?.analysisResults || {}
+      const { [`${mode}_pending`]: _, ...rest } = results
+      await updateRecord(Number(id), {
+        analysisResults: { ...rest, [mode]: data },
+        analyzedAt: new Date().toISOString(),
+      })
+    }).catch(async (err) => {
+      console.error('后台分析失败:', err)
+      try {
+        const currentRecord = await getRecord(Number(id))
+        const results = currentRecord?.analysisResults || {}
+        const { [`${mode}_pending`]: _, ...rest } = results
+        await updateRecord(Number(id), {
+          analysisResults: { ...rest, [`${mode}_error`]: err.message },
+        })
+      } catch (_) {}
+    })
   }
 
   const radarData = result ? [
@@ -190,7 +185,6 @@ export default function AIAnalyze() {
 
       {/* 视频选择 */}
       <div className="space-y-3 mb-5">
-        {/* 我的视频 — 已自动加载，可点击换源 */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
           <label className="text-sm font-medium text-gray-700 mb-2 block">我的舞蹈视频</label>
           <div
@@ -200,7 +194,7 @@ export default function AIAnalyze() {
             {myFile ? (
               <div>
                 <div className="text-sm text-dpink-500 font-medium">{myFile.name}</div>
-                <div className="text-xs text-gray-400 mt-0.5">{(myFile.size / 1024 / 1024).toFixed(1)} MB · 点击更换</div>
+                <div className="text-xs text-gray-400 mt-0.5">{(myFile.size / 1024 / 1024).toFixed(1)} MB</div>
               </div>
             ) : (
               <div>
@@ -212,7 +206,6 @@ export default function AIAnalyze() {
           <input ref={myInputRef} type="file" accept="video/*" className="hidden" onChange={e => setMyFile(e.target.files?.[0])} />
         </div>
 
-        {/* 老师视频（仅对比模式） */}
         {mode === 'compare' && (
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
             <label className="text-sm font-medium text-gray-700 mb-2 block">老师示范视频</label>
@@ -237,7 +230,6 @@ export default function AIAnalyze() {
         )}
       </div>
 
-      {/* 分析按钮 */}
       <button
         onClick={handleAnalyze}
         disabled={analyzing}
@@ -246,7 +238,7 @@ export default function AIAnalyze() {
         {analyzing ? (
           <>
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            AI 分析中...
+            已开始分析，返回后可查看进度
           </>
         ) : (
           <>
@@ -258,7 +250,8 @@ export default function AIAnalyze() {
         )}
       </button>
 
-      {/* 错误提示 */}
+      <p className="text-center text-xs text-gray-400 -mt-4 mb-4">开始后可以自由浏览，分析完成后结果会自动保存</p>
+
       {error && (
         <div className="bg-red-50 border border-red-100 rounded-2xl p-4 mb-4">
           <p className="text-red-500 text-sm font-medium">分析失败</p>
@@ -266,10 +259,8 @@ export default function AIAnalyze() {
         </div>
       )}
 
-      {/* 分析结果 */}
       {result && !error && (
         <div className="space-y-5 animate-slide-up">
-          {/* 综合评分 */}
           <div className="flex flex-col items-center">
             <div className="relative w-28 h-28">
               <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -285,7 +276,6 @@ export default function AIAnalyze() {
             </div>
           </div>
 
-          {/* 雷达图 */}
           {radarData.length > 0 && (
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
               <h3 className="text-sm font-bold text-gray-800 mb-3">各维度评分</h3>
@@ -299,7 +289,6 @@ export default function AIAnalyze() {
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
-              {/* 各维度数值 */}
               <div className="grid grid-cols-5 gap-2 mt-2">
                 {radarData.map(d => (
                   <div key={d.dimension} className="text-center">
@@ -311,7 +300,6 @@ export default function AIAnalyze() {
             </div>
           )}
 
-          {/* 问题 */}
           {result.problems?.length > 0 && (
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
               <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -328,7 +316,6 @@ export default function AIAnalyze() {
             </div>
           )}
 
-          {/* 建议 */}
           {result.tips?.length > 0 && (
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
               <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -345,7 +332,6 @@ export default function AIAnalyze() {
             </div>
           )}
 
-          {/* 优点 */}
           {result.strengths?.length > 0 && (
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
               <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -362,7 +348,6 @@ export default function AIAnalyze() {
             </div>
           )}
 
-          {/* 配置提示 */}
           {!result.dimensions?.control && (
             <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-sm text-amber-700">
               ⚠️ AI 返回的数据格式异常，请检查服务器日志或 API Key 配置

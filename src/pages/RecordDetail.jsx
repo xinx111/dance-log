@@ -15,6 +15,23 @@ export default function RecordDetail() {
 
   useEffect(() => { loadRecord() }, [id])
 
+  // 当有分析中状态时，定时轮询检查结果
+  useEffect(() => {
+    if (!record?.analysisResults) return
+    const hasPending = record.analysisResults.single_pending || record.analysisResults.compare_pending
+    if (!hasPending) return
+
+    const interval = setInterval(async () => {
+      const updated = await getRecord(Number(id))
+      setRecord(updated)
+      // 如果 pending 标记已消失，说明分析完成，停止轮询
+      const stillPending = updated?.analysisResults?.single_pending || updated?.analysisResults?.compare_pending
+      if (!stillPending) clearInterval(interval)
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [record?.analysisResults])
+
   async function loadRecord() {
     try {
       const data = await getRecord(Number(id))
@@ -142,7 +159,7 @@ export default function RecordDetail() {
         </div>
       )}
 
-      {/* 已有分析结果 */}
+      {/* 已有分析结果 / 分析中 */}
       {record.analysisResults && (
         <div className="space-y-3 mb-4">
           {record.analysisResults.single && (
@@ -150,6 +167,24 @@ export default function RecordDetail() {
           )}
           {record.analysisResults.compare && (
             <AnalysisCard title="对比分析" result={record.analysisResults.compare} analyzedAt={record.analyzedAt} />
+          )}
+          {record.analysisResults.single_pending && !record.analysisResults.single && (
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 text-center">
+              <div className="flex items-center justify-center gap-2 text-dpink-400 font-medium text-sm mb-1">
+                <div className="w-4 h-4 border-2 border-dpink-200 border-t-dpink-400 rounded-full animate-spin" />
+                独立点评分析中...
+              </div>
+              <p className="text-xs text-gray-400">完成后将自动显示结果</p>
+            </div>
+          )}
+          {record.analysisResults.compare_pending && !record.analysisResults.compare && (
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 text-center">
+              <div className="flex items-center justify-center gap-2 text-dpurple-400 font-medium text-sm mb-1">
+                <div className="w-4 h-4 border-2 border-dpurple-200 border-t-dpurple-400 rounded-full animate-spin" />
+                对比分析分析中...
+              </div>
+              <p className="text-xs text-gray-400">完成后将自动显示结果</p>
+            </div>
           )}
         </div>
       )}
