@@ -50,8 +50,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Sign APK (if keystore configured)
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      - name: Sign APK
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
           jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
@@ -60,7 +59,6 @@ jobs:
             -keypass "${{ secrets.KEY_PASSWORD }}" \
             android/app/build/outputs/apk/debug/app-debug.apk \
             "${{ secrets.KEY_ALIAS }}"
-          rm keystore.jks
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
