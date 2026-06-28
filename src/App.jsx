@@ -129,40 +129,16 @@ function ChartIcon({ active }) {
 }
 
 function ProfileIcon({ active }) {
+  const o = active ? 1 : 0.35
   return (
-    <svg viewBox="0 0 28 28" fill="none" className="w-6 h-6">
-      {/* 小猫猫脸 */}
-      <ellipse cx={14} cy={15} rx={10} ry={9}
-        fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.8} />
-      {/* 耳朵 */}
-      {active ? (
-        <>
-          <path d="M6 10L4 4L10 8Z" fill="currentColor" />
-          <path d="M22 10L24 4L18 8Z" fill="currentColor" />
-        </>
-      ) : (
-        <>
-          <path d="M6 10L4 4L10 8Z" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" />
-          <path d="M22 10L24 4L18 8Z" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" />
-        </>
-      )}
-      {/* 眼睛 */}
-      <circle cx={10} cy={14} r={active ? 2 : 1.2} fill={active ? 'white' : 'currentColor'} />
-      <circle cx={18} cy={14} r={active ? 2 : 1.2} fill={active ? 'white' : 'currentColor'} />
-      {/* 眼睛高光 */}
-      {active && (
-        <>
-          <circle cx={9} cy={13.5} r={0.6} fill="currentColor" />
-          <circle cx={17} cy={13.5} r={0.6} fill="currentColor" />
-        </>
-      )}
-      {/* 小鼻子 */}
-      <ellipse cx={14} cy={17} rx={1.5} ry={1} fill={active ? 'white' : 'currentColor'} opacity={active ? 1 : 0.6} />
-      {/* 胡须 */}
-      <line x1={6} y1={17} x2={9} y2={17.5} stroke="currentColor" strokeWidth={1.2} opacity={0.5} />
-      <line x1={6} y1={19} x2={9} y2={18.5} stroke="currentColor" strokeWidth={1.2} opacity={0.5} />
-      <line x1={22} y1={17} x2={19} y2={17.5} stroke="currentColor" strokeWidth={1.2} opacity={0.5} />
-      <line x1={22} y1={19} x2={19} y2={18.5} stroke="currentColor" strokeWidth={1.2} opacity={0.5} />
+    <svg viewBox="0 0 1024 1024" className="w-6 h-6" style={{ filter: active ? 'none' : 'grayscale(1)' }}>
+      <path d="M762.88 372.94H624.73c12.98-20.37 20.5-44.56 20.5-70.51 0-72.59-58.85-131.44-131.44-131.44s-131.44 58.85-131.44 131.44c0 25.95 7.52 50.13 20.5 70.51H264.12c-40.38 0-73.12 32.74-73.12 73.12s32.74 73.12 73.12 73.12H392.8V636.1L292.74 736.16c-28.55 28.55-28.55 74.85 0 103.4 28.55 28.55 74.85 28.55 103.4 0l128.62-128.62 128.62 128.62c28.55 28.55 74.85 28.55 103.4 0 28.55-28.55 28.55-74.85 0-103.4L634.77 614.15v-94.96h128.1c40.38 0 73.12-32.74 73.12-73.12s-32.74-73.12-73.12-73.12z" fill="#FCCF8D" opacity={o} />
+      <path d="M466.78 268.96m-20.6 0a20.6 20.6 0 1 0 41.2 0 20.6 20.6 0 1 0-41.2 0Z" fill="#4A7F46" opacity={o} />
+      <path d="M567.25 268.96m-20.6 0a20.6 20.6 0 1 0 41.2 0 20.6 20.6 0 1 0-41.2 0Z" fill="#4A7F46" opacity={o} />
+      <path d="M580.81 317.68c0 37.18-30.14 67.31-67.31 67.31s-67.31-30.14-67.31-67.31" fill="#F97319" opacity={o} />
+      <path d="M525.8 552.25m-24.35 0a24.35 24.35 0 1 0 48.7 0 24.35 24.35 0 1 0-48.7 0Z" fill="#FFFFFF" opacity={o} />
+      <path d="M525.8 607.79m-24.35 0a24.35 24.35 0 1 0 48.7 0 24.35 24.35 0 1 0-48.7 0Z" fill="#FFFFFF" opacity={o} />
+      <path d="M780.45 273.07c0-12.38-7.74-24.75-23.2-24.75-13.93 0-20.11 12.38-20.11 12.38s-6.19-12.38-20.11-12.38c-15.47 0-23.21 12.38-23.21 24.75 0 18.56 17.13 33.71 34.61 44.48a16.589 16.589 0 0 0 17.41 0c17.48-10.77 34.61-25.92 34.61-44.48zM557.02 484.3c0-8.9-5.56-17.81-16.69-17.81-10.02 0-14.47 8.9-14.47 8.9s-4.45-8.9-14.47-8.9c-11.13 0-16.69 8.9-16.69 17.81 0 13.35 12.32 24.25 24.9 32a11.93 11.93 0 0 0 12.53 0c12.57-7.75 24.89-18.65 24.89-32z" fill="#F97319" opacity={o} />
     </svg>
   )
 }

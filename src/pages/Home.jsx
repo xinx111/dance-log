@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getRecordsByCategory, getStats } from '../db'
 import { formatDate } from '../utils/format'
+import GoodIcon from '../components/GoodIcon'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -63,7 +64,7 @@ export default function Home() {
                   <p className="text-5xl font-bold mt-1">{goodCount}</p>
                   <p className="text-white/70 text-xs mt-1">个视频</p>
                 </div>
-                <div className="text-6xl">⭐</div>
+                <GoodIcon size={80} />
               </div>
             </div>
           </div>

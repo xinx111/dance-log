@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getRecord, deleteRecord } from '../db'
 import { formatDate, formatDuration } from '../utils/format'
 import { getVideoUri, deleteVideoFile } from '../utils/storage'
+import GoodIcon from '../components/GoodIcon'
 
 export default function RecordDetail() {
   const { id } = useParams()
@@ -120,7 +121,7 @@ export default function RecordDetail() {
           <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ml-3 ${
             isGood ? 'bg-dpink-100 text-dpink-400' : 'bg-dpurple-50 text-dpurple-400'
           }`}>
-            {isGood ? '🌟 跳得很好' : '🔥 还需要努力'}
+            {isGood ? <><GoodIcon size={16} /> 跳得很好</> : '🔥 还需要努力'}
           </span>
         </div>
         <div className="flex items-center gap-4 text-sm text-gray-500 border-t border-gray-50 pt-3">

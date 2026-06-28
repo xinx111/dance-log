@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { addRecord, updateRecord, getRecord, DANCE_TYPES } from '../db'
 import { getDateStr } from '../utils/format'
 import { saveVideo, getVideoUri } from '../utils/storage'
+import GoodIcon from '../components/GoodIcon'
 
 export default function RecordForm() {
   const navigate = useNavigate()
@@ -231,7 +232,7 @@ export default function RecordForm() {
                   : 'border-gray-100 bg-gray-50 text-gray-500'
               }`}
             >
-              <div className="text-2xl mb-1">🌟</div>
+              <div className="mb-1 flex justify-center"><GoodIcon size={28} /></div>
               <span className="font-bold text-sm">跳得很好</span>
             </button>
             <button

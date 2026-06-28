@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getRecordsByCategory } from '../db'
 import { formatDate, formatDuration } from '../utils/format'
+import GoodIcon from '../components/GoodIcon'
 
 export default function RecordList() {
   const navigate = useNavigate()
@@ -145,7 +146,7 @@ function Section({ title, count, color, records, onClickRecord }) {
             <div className={`w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center text-xl ${
               isPink ? 'bg-dpink-100' : 'bg-dpurple-100'
             }`}>
-              {isPink ? '🌟' : '🔥'}
+              {isPink ? <GoodIcon size={24} /> : '🔥'}
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-gray-800 truncate">
