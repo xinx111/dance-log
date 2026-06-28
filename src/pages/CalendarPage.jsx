@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getRecordsByMonth, getStreak } from '../db'
+import { getRecordsByMonth, getTotalPracticeDays } from '../db'
 import { getMonthDays, formatDate, formatMonth, formatDuration } from '../utils/format'
 import { getVideoUri } from '../utils/storage'
 import GoodIcon from '../components/GoodIcon'
@@ -16,7 +16,7 @@ export default function CalendarPage() {
   const [maxCount, setMaxCount] = useState(0)                   // 本月最高单日练习数
   const [selectedDate, setSelectedDate] = useState(null)
   const [dayRecords, setDayRecords] = useState([])
-  const [streak, setStreak] = useState(0)
+  const [totalDays, setTotalDays] = useState(0)
   const [loading, setLoading] = useState(true)
   const [monthStats, setMonthStats] = useState({ count: 0, days: 0 })
   const [playingVideoId, setPlayingVideoId] = useState(null)
@@ -38,8 +38,8 @@ export default function CalendarPage() {
       const max = Math.max(...Object.values(countMap), 0)
       setMaxCount(max)
       setMonthStats({ count: records.length, days: Object.keys(countMap).length })
-      const s = await getStreak()
-      setStreak(s)
+      const days = await getTotalPracticeDays()
+      setTotalDays(days)
       if (selectedDate) {
         const dr = records.filter(r => new Date(r.date).toDateString() === new Date(selectedDate).toDateString())
         setDayRecords(dr)
@@ -95,11 +95,11 @@ export default function CalendarPage() {
       <h1 className="text-2xl font-bold text-gray-800 mb-1">练习日历</h1>
       <p className="text-gray-400 text-sm mb-4">查看你的舞蹈足迹</p>
 
-      {/* 连续打卡 */}
+      {/* 总练习天数 */}
       <div className="bg-dpink-200 rounded-2xl p-5 text-white shadow-lg shadow-dpink-200/40 flex items-center justify-between mb-4">
         <div>
-          <p className="text-white/80 text-sm">连续打卡</p>
-          <p className="text-3xl font-bold mt-1">{streak} 天</p>
+          <p className="text-white/80 text-sm">总天数</p>
+          <p className="text-3xl font-bold mt-1">{totalDays} 天</p>
         </div>
         <div className="text-right">
           <p className="text-white/80 text-sm">本月练习</p>

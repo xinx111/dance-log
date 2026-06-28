@@ -116,24 +116,10 @@ export async function getStats() {
     }
   })
 
-  // 连续练习天数
-  const sortedDates = [...new Set(
+  // 总练习天数
+  const totalDays = new Set(
     records.map(r => new Date(r.date).toDateString())
-  )].sort((a, b) => new Date(b) - new Date(a))
-
-  let streak = 0
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  for (let i = 0; i < sortedDates.length; i++) {
-    const expected = new Date(today)
-    expected.setDate(expected.getDate() - i)
-    if (sortedDates[i] === expected.toDateString()) {
-      streak++
-    } else {
-      break
-    }
-  }
+  ).size
 
   return {
     totalRecords,
@@ -141,7 +127,7 @@ export async function getStats() {
     practiceDays,
     totalDuration,
     danceTypeDist,
-    streak,
+    totalDays,
   }
 }
 
@@ -151,22 +137,12 @@ export async function getAllPracticeDates() {
     .map(d => new Date(d))
 }
 
-/** 获取连续练习天数（从指定日期往前推） */
-export async function getStreak(fromDate = new Date()) {
+/** 获取总练习天数 */
+export async function getTotalPracticeDays() {
   const records = await db.danceRecords.toArray()
-  const dateSet = new Set(
+  return new Set(
     records.map(r => new Date(r.date).toDateString())
-  )
-
-  let streak = 0
-  const d = new Date(fromDate)
-  d.setHours(0, 0, 0, 0)
-
-  while (dateSet.has(d.toDateString())) {
-    streak++
-    d.setDate(d.getDate() - 1)
-  }
-  return streak
+  ).size
 }
 
 // ===== 设置 =====
@@ -209,18 +185,10 @@ export async function getStatsByRange(range = 'month') {
     if (r.danceType) danceTypeDist[r.danceType] = (danceTypeDist[r.danceType] || 0) + 1
   })
 
-  // 连续练习天数
-  const sortedDates = [...new Set(records.map(r => new Date(r.date).toDateString()))]
-    .sort((a, b) => new Date(b) - new Date(a))
-  let streak = 0
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  for (let i = 0; i < sortedDates.length; i++) {
-    const expected = new Date(today)
-    expected.setDate(expected.getDate() - i)
-    if (sortedDates[i] === expected.toDateString()) streak++
-    else break
-  }
+  // 总练习天数
+  const totalDays = new Set(
+    records.map(r => new Date(r.date).toDateString())
+  ).size
 
   return {
     totalRecords,
@@ -228,7 +196,7 @@ export async function getStatsByRange(range = 'month') {
     practiceDays,
     totalDuration,
     danceTypeDist,
-    streak,
+    totalDays,
     rangeLabel: range === 'week' ? '本周' : range === 'year' ? '本年' : '本月',
   }
 }

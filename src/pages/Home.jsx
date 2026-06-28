@@ -53,9 +53,9 @@ export default function Home() {
             <div className="relative z-10">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/85 text-sm font-medium">舞蹈记录</p>
-                  <p className="text-5xl font-bold mt-1">{stats?.totalRecords || 0}</p>
-                  <p className="text-white/70 text-xs mt-1">个视频</p>
+                  <p className="text-white/85 text-sm font-medium">本月记录</p>
+                  <p className="text-5xl font-bold mt-1">{stats?.monthRecords || 0}</p>
+                  <p className="text-white/70 text-xs mt-1">条</p>
                 </div>
                 <GoodIcon size={80} />
               </div>
@@ -77,8 +77,8 @@ export default function Home() {
                 </div>
                 <div className="w-px h-10 bg-gray-100" />
                 <div>
-                  <p className="text-2xl font-bold text-dpink-400">{stats.streak}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">连续天数</p>
+                  <p className="text-2xl font-bold text-dpink-400">{stats.totalDays}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">总天数</p>
                 </div>
               </div>
             </div>

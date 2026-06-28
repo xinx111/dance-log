@@ -112,7 +112,7 @@ export default function Profile() {
       {/* 用户信息 — 可点击编辑 */}
       <div
         onClick={startEdit}
-        className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 flex items-center gap-4 cursor-pointer active:scale-[0.99] transition-transform"
+        className="bg-white rounded-2xl p-5 shadow border border-gray-100 flex items-center gap-4 cursor-pointer active:scale-[0.99] transition-transform"
       >
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-dpink-200 to-dpurple-400 flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
           {avatarContent}
@@ -183,7 +183,7 @@ export default function Profile() {
 
       {/* 数据统计 */}
       {stats && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
+        <div className="bg-white rounded-2xl p-5 shadow border border-gray-100 border-l-4 border-l-dpink-200">
           <h3 className="text-sm font-medium text-gray-500 mb-3">数据概览</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
@@ -204,7 +204,7 @@ export default function Profile() {
 
       {/* 存储状态 */}
       {storageStats && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
+        <div className="bg-white rounded-2xl p-5 shadow border border-gray-100 border-l-4 border-l-dpurple-200">
           <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-1.5"><StorageIcon size={18} /> 存储状态</h3>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
@@ -238,7 +238,7 @@ export default function Profile() {
       )}
 
       {/* 数据管理 */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 space-y-1">
+      <div className="bg-white rounded-2xl p-5 shadow border border-gray-100 space-y-1">
         <h3 className="text-sm font-medium text-gray-500 mb-2">数据管理</h3>
         <MenuItem icon={<BackupIcon size={20} />} label="导出备份" sub={lastBackup ? `上次备份: ${formatDate(lastBackup)}` : '尚未备份'} onClick={handleExport} loading={exporting} />
         <MenuItem icon={<BackupIcon size={20} className="-scale-x-100" />} label="导入备份" sub="从备份文件恢复数据" onClick={() => fileInputRef.current?.click()} loading={importing} />

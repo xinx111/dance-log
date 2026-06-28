@@ -109,7 +109,7 @@ export default function Summary() {
         <SummaryCard icon={<RecordsIcon size={24} />} label="总记录" value={`${stats.totalRecords}`} color="from-dpink-200 to-dpink-300" />
         <SummaryCard icon={<MailIcon size={24} />} label={`${stats.rangeLabel}练习`} value={`${stats.practiceDays}天`} color="from-dpurple-400 to-dpurple-500" />
         <SummaryCard icon={<DurationIcon size={24} />} label="练习时长" value={formatDurationCN(stats.totalDuration)} color="from-dpink-300 to-dpink-400" />
-        <SummaryCard icon={<StreakIcon size={24} />} label="连续打卡" value={`${stats.streak}天`} color="from-dpurple-300 to-dpurple-400" />
+        <SummaryCard icon={<StreakIcon size={24} />} label="总天数" value={`${stats.totalDays}天`} color="from-dpurple-300 to-dpurple-400" />
       </div>
 
       {/* 练习趋势 */}
