@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { getStatsByRange, getAllRecords } from '../db'
-import { formatDurationCN } from '../utils/format'
 import {
   PieChart, Pie, Cell, ResponsiveContainer,
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip
 } from 'recharts'
 import RecordsIcon from '../components/RecordsIcon'
-import DurationIcon from '../components/DurationIcon'
 import MailIcon from '../components/MailIcon'
 import StreakIcon from '../components/StreakIcon'
 
@@ -106,9 +104,8 @@ export default function Summary() {
 
       {/* 概览卡片 */}
       <div className="grid grid-cols-2 gap-3">
-        <SummaryCard icon={<RecordsIcon size={24} />} label="总记录" value={`${stats.totalRecords}`} color="from-dpink-200 to-dpink-300" />
+        <SummaryCard icon={<RecordsIcon size={24} />} label="舞蹈个数" value={`${stats.totalRecords}`} color="from-dpink-200 to-dpink-300" />
         <SummaryCard icon={<MailIcon size={24} />} label={`${stats.rangeLabel}练习`} value={`${stats.practiceDays}天`} color="from-dpurple-400 to-dpurple-500" />
-        <SummaryCard icon={<DurationIcon size={24} />} label="练习时长" value={formatDurationCN(stats.totalDuration)} color="from-dpink-300 to-dpink-400" />
         <SummaryCard icon={<StreakIcon size={24} />} label="总天数" value={`${stats.totalDays}天`} color="from-dpurple-300 to-dpurple-400" />
       </div>
 
@@ -175,7 +172,6 @@ export default function Summary() {
           <h2 className="text-base font-bold text-gray-800 mb-2">📋 {stats.rangeLabel}小结</h2>
           <div className="space-y-1.5 text-sm text-gray-600">
             <p>{stats.rangeLabel}共练习 <strong className="text-gray-800">{stats.practiceDays}</strong> 天，完成 <strong className="text-gray-800">{stats.rangeRecords}</strong> 条记录</p>
-            {stats.totalDuration > 0 && <p>总练习时长约 <strong className="text-gray-800">{formatDurationCN(stats.totalDuration)}</strong></p>}
             {danceTypeData.length > 0 && <p>最常练习的舞种：<strong className="text-gray-800">{danceTypeData[0]?.name}</strong></p>}
           </div>
         </div>
