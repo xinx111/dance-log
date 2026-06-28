@@ -12,8 +12,6 @@ export default function CalendarPage() {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
-  const [practiceCount, setPracticeCount] = useState({})        // { "Mon DD YYYY": count }
-  const [maxCount, setMaxCount] = useState(0)                   // 本月最高单日练习数
   const [selectedDate, setSelectedDate] = useState(null)
   const [dayRecords, setDayRecords] = useState([])
   const [totalDays, setTotalDays] = useState(0)
@@ -28,16 +26,7 @@ export default function CalendarPage() {
     setLoading(true)
     try {
       const records = await getRecordsByMonth(year, month)
-      // 统计每天练习数量
-      const countMap = {}
-      records.forEach(r => {
-        const key = new Date(r.date).toDateString()
-        countMap[key] = (countMap[key] || 0) + 1
-      })
-      setPracticeCount(countMap)
-      const max = Math.max(...Object.values(countMap), 0)
-      setMaxCount(max)
-      setMonthStats({ count: records.length, days: Object.keys(countMap).length })
+      setMonthStats({ count: records.length, days: [...new Set(records.map(r => new Date(r.date).toDateString()))].length })
       const days = await getTotalPracticeDays()
       setTotalDays(days)
       if (selectedDate) {
@@ -71,24 +60,20 @@ export default function CalendarPage() {
     }
   }
 
-  /** 根据练习量返回热力颜色 class */
-  function getHeatColor(dateStr, isSelected, isToday) {
-    if (isSelected) return 'bg-dpink-400 text-white shadow-md'
-    if (isToday && !practiceCount[dateStr]) return 'bg-dpink-50 text-dpink-400'
-
-    const count = practiceCount[dateStr] || 0
-    if (count === 0) return 'hover:bg-gray-50 text-gray-700'
-
-    const ratio = maxCount > 0 ? count / maxCount : 0
-    if (ratio >= 0.8) return 'bg-dpurple-400 text-white'
-    if (ratio >= 0.5) return 'bg-dpurple-300 text-white'
-    if (ratio >= 0.3) return 'bg-dpurple-200 text-dpurple-700'
-    return 'bg-dpurple-100 text-dpurple-500'
-  }
-
   const days = getMonthDays(year, month)
   const weekDays = ['日', '一', '二', '三', '四', '五', '六']
   const today = new Date()
+
+  function getDayClass(day) {
+    if (!day) return ''
+    const date = new Date(year, month - 1, day)
+    const dateStr = date.toDateString()
+    const isToday = dateStr === today.toDateString()
+    const isSelected = selectedDate?.toDateString() === dateStr
+    if (isSelected) return 'bg-dpink-400 text-white shadow-md'
+    if (isToday) return 'bg-dpink-50 text-dpink-400 font-semibold'
+    return 'hover:bg-gray-50 text-gray-700'
+  }
 
   return (
     <div className="px-4 pt-6 pb-4 animate-fade-in">
@@ -135,32 +120,15 @@ export default function CalendarPage() {
         <div className="grid grid-cols-7 gap-1">
           {days.map((day, index) => {
             if (!day) return <div key={`e-${index}`} className="aspect-square" />
-            const date = new Date(year, month - 1, day)
-            const dateStr = date.toDateString()
-            const isToday = dateStr === today.toDateString()
-            const isSelected = selectedDate?.toDateString() === dateStr
-
             return (
               <button key={day} onClick={() => handleDateClick(day)}
-                className={`aspect-square rounded-xl flex flex-col items-center justify-center relative transition-all ${getHeatColor(dateStr, isSelected, isToday)}`}>
+                className={`aspect-square rounded-xl flex items-center justify-center transition-all ${getDayClass(day)}`}>
                 <span className="text-sm font-medium">{day}</span>
               </button>
             )
           })}
         </div>
       </div>
-
-      {/* 热力图例 */}
-      {maxCount > 0 && (
-        <div className="flex items-center justify-center gap-2 mt-3 text-xs text-gray-400">
-          <span>少</span>
-          <div className="w-4 h-4 rounded bg-dpurple-100" />
-          <div className="w-4 h-4 rounded bg-dpurple-200" />
-          <div className="w-4 h-4 rounded bg-dpurple-300" />
-          <div className="w-4 h-4 rounded bg-dpurple-400" />
-          <span>多</span>
-        </div>
-      )}
 
       {/* 选中日期的记录 */}
       {selectedDate && (
@@ -228,15 +196,6 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* 图例 */}
-      <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-400">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-dpink-400" />选中
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-dpink-50" />今天
-        </div>
-      </div>
     </div>
   )
 }
