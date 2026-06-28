@@ -9,7 +9,7 @@ import DefaultAvatar from '../components/DefaultAvatar'
 import GoodIcon from '../components/GoodIcon'
 import {
   PieChart, Pie, Cell, ResponsiveContainer,
-  AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts'
 
 const CHART_COLORS = ['#FFB6C1', '#FF8FA3', '#A78BFA', '#22C55E', '#C4B0FF', '#F59E0B', '#F43F5E']
@@ -23,7 +23,6 @@ export default function Home() {
   const navigate = useNavigate()
   const [range, setRange] = useState('month')
   const [stats, setStats] = useState(null)
-  const [trendData, setTrendData] = useState([])
   const [aiScoreData, setAiScoreData] = useState([])
   const [danceTypeData, setDanceTypeData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,29 +37,10 @@ export default function Home() {
         getAllRecords(),
       ])
       setStats(statsData)
-      setTrendData(computeTrend(allRecords, range))
       setAiScoreData(computeAiScores(allRecords))
       setDanceTypeData(computeDanceTypes(allRecords, range))
     } catch (err) { console.error(err) }
     setLoading(false)
-  }
-
-  function computeTrend(records, r) {
-    const grouped = {}
-    const getKey = r === 'year'
-      ? (d) => `${d.getFullYear()}.${d.getMonth() + 1}月`
-      : (d) => `${d.getMonth() + 1}/${d.getDate()}`
-
-    records.forEach(r => {
-      const d = new Date(r.date)
-      const key = getKey(d)
-      if (!grouped[key]) grouped[key] = { label: key, count: 0 }
-      grouped[key].count++
-    })
-
-    let sorted = Object.values(grouped).sort((a, b) => a.label.localeCompare(b.label))
-    if (r === 'year') sorted = sorted.slice(-12)
-    return sorted
   }
 
   function computeAiScores(records) {
@@ -171,58 +151,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* 练习趋势 */}
-      {trendData.length > 1 && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
-          <h2 className="text-base font-bold text-gray-800 mb-3">练习趋势</h2>
-          <div className="h-44">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData}>
-                <defs>
-                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FFB6C1" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#FFB6C1" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#999' }} axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#999' }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 13 }}
-                  formatter={(v) => [`${v} 条`]} />
-                <Area type="monotone" dataKey="count" stroke="#FFB6C1" strokeWidth={2} fill="url(#colorCount)"
-                  dot={{ fill: '#FFB6C1', r: 3 }} activeDot={{ r: 5, fill: '#FFB6C1' }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {/* AI 评分趋势 */}
-      {aiScoreData.length > 1 && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
-          <h2 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-1.5">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4 text-dpink-400">
-              <path d="M12 2l2.4 7.2L22 9l-6 4.8L17.6 22 12 17l-5.6 5L8 13.8 2 9l7.6-.2z" />
-            </svg>
-            AI 评分趋势
-          </h2>
-          <div className="h-44">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={aiScoreData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#999' }} axisLine={false} tickLine={false} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#999' }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 13 }}
-                  formatter={(v) => [`${v} 分`]} />
-                <Line type="monotone" dataKey="score" stroke="#8E7DFE" strokeWidth={2.5}
-                  dot={{ fill: '#8E7DFE', r: 4, strokeWidth: 2, stroke: '#fff' }}
-                  activeDot={{ r: 6, fill: '#8E7DFE' }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
       {/* 舞种分布 */}
       {danceTypeData.length > 0 && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
@@ -249,6 +177,32 @@ export default function Home() {
                 <span className="font-medium text-gray-800">{item.value}</span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* AI 评分趋势 */}
+      {aiScoreData.length > 1 && (
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
+          <h2 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-1.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4 text-dpink-400">
+              <path d="M12 2l2.4 7.2L22 9l-6 4.8L17.6 22 12 17l-5.6 5L8 13.8 2 9l7.6-.2z" />
+            </svg>
+            AI 评分趋势
+          </h2>
+          <div className="h-44">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={aiScoreData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#999' }} axisLine={false} tickLine={false} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#999' }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 13 }}
+                  formatter={(v) => [`${v} 分`]} />
+                <Line type="monotone" dataKey="score" stroke="#8E7DFE" strokeWidth={2.5}
+                  dot={{ fill: '#8E7DFE', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                  activeDot={{ r: 6, fill: '#8E7DFE' }} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}

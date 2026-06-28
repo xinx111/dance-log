@@ -17,6 +17,7 @@ export default function CalendarPage() {
   const [totalDays, setTotalDays] = useState(0)
   const [loading, setLoading] = useState(true)
   const [monthStats, setMonthStats] = useState({ count: 0, days: 0 })
+  const [practiceSet, setPracticeSet] = useState(new Set())
   const [playingVideoId, setPlayingVideoId] = useState(null)
   const [videoSrcs, setVideoSrcs] = useState({})
 
@@ -26,7 +27,9 @@ export default function CalendarPage() {
     setLoading(true)
     try {
       const records = await getRecordsByMonth(year, month)
-      setMonthStats({ count: records.length, days: [...new Set(records.map(r => new Date(r.date).toDateString()))].length })
+      const dateSet = new Set(records.map(r => new Date(r.date).toDateString()))
+      setPracticeSet(dateSet)
+      setMonthStats({ count: records.length, days: dateSet.size })
       const days = await getTotalPracticeDays()
       setTotalDays(days)
       if (selectedDate) {
@@ -120,10 +123,15 @@ export default function CalendarPage() {
         <div className="grid grid-cols-7 gap-1">
           {days.map((day, index) => {
             if (!day) return <div key={`e-${index}`} className="aspect-square" />
+            const date = new Date(year, month - 1, day)
+            const hasRecord = practiceSet.has(date.toDateString())
             return (
               <button key={day} onClick={() => handleDateClick(day)}
-                className={`aspect-square rounded-xl flex items-center justify-center transition-all ${getDayClass(day)}`}>
-                <span className="text-sm font-medium">{day}</span>
+                className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all relative ${getDayClass(day)}`}>
+                <span className="text-sm font-medium leading-tight">{day}</span>
+                {hasRecord && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-dpink-400 mt-0.5" />
+                )}
               </button>
             )
           })}
@@ -176,7 +184,7 @@ export default function CalendarPage() {
                       <div className="border-t border-gray-50 animate-slide-up">
                         {videoSrcs[record.id] ? (
                           <video src={videoSrcs[record.id]} controls
-                            className="w-full max-h-64 object-contain bg-black" controls />
+                            className="w-full max-h-64 object-contain bg-black" />
                         ) : record.videoUrl ? (
                           <div className="flex items-center justify-center h-32 bg-gray-50 text-gray-400 text-sm">
                             加载中...
