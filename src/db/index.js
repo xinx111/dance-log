@@ -102,10 +102,6 @@ export async function getStats() {
     monthRecords.map(r => new Date(r.date).toDateString())
   ).size
 
-  // 跳得很好 vs 还需努力
-  const goodCount = monthRecords.filter(r => r.category === 'good').length
-  const needsWorkCount = monthRecords.filter(r => r.category === 'needs-work').length
-
   // 本月总时长
   const totalDuration = monthRecords.reduce((sum, r) => sum + (r.duration || 0), 0)
 
@@ -143,8 +139,6 @@ export async function getStats() {
     totalRecords,
     monthRecords: monthRecords.length,
     practiceDays,
-    goodCount,
-    needsWorkCount,
     totalDuration,
     danceTypeDist,
     streak,
@@ -207,8 +201,6 @@ export async function getStatsByRange(range = 'month') {
 
   const rangeRecords = records.filter(r => new Date(r.date) >= start)
   const practiceDays = new Set(rangeRecords.map(r => new Date(r.date).toDateString())).size
-  const goodCount = rangeRecords.filter(r => r.category === 'good').length
-  const needsWorkCount = rangeRecords.filter(r => r.category === 'needs-work').length
   const totalDuration = rangeRecords.reduce((sum, r) => sum + (r.duration || 0), 0)
   const totalRecords = records.length
 
@@ -234,8 +226,6 @@ export async function getStatsByRange(range = 'month') {
     totalRecords,
     rangeRecords: rangeRecords.length,
     practiceDays,
-    goodCount,
-    needsWorkCount,
     totalDuration,
     danceTypeDist,
     streak,

@@ -5,6 +5,8 @@ import { getMonthDays, formatDate, formatMonth, formatDuration } from '../utils/
 import { getVideoUri } from '../utils/storage'
 import GoodIcon from '../components/GoodIcon'
 
+const iconMap = { good: <GoodIcon size={20} /> }
+
 export default function CalendarPage() {
   const navigate = useNavigate()
   const now = new Date()
@@ -187,7 +189,7 @@ export default function CalendarPage() {
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${
                         record.category === 'good' ? 'bg-dpink-100' : 'bg-dpurple-100'
                       }`}>
-                        {record.category === 'good' ? <GoodIcon size={20} /> : '🔥'}
+                        {iconMap[record.category] || <GoodIcon size={20} />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-800 truncate">{record.songName || '未命名'}</p>

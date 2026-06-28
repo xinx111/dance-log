@@ -43,10 +43,8 @@ export default function Summary() {
     records.forEach(r => {
       const d = new Date(r.date)
       const key = getKey(d)
-      if (!grouped[key]) grouped[key] = { label: key, count: 0, good: 0, needsWork: 0 }
+      if (!grouped[key]) grouped[key] = { label: key, count: 0 }
       grouped[key].count++
-      if (r.category === 'good') grouped[key].good++
-      else grouped[key].needsWork++
     })
 
     let sorted = Object.values(grouped).sort((a, b) => a.label.localeCompare(b.label))
@@ -79,11 +77,6 @@ export default function Summary() {
     )
   }
 
-  const categoryData = [
-    { name: '跳得很好', value: stats.goodCount, color: '#FFB6C1' },
-    { name: '还需要努力', value: stats.needsWorkCount, color: '#8E7DFE' },
-  ].filter(d => d.value > 0)
-
   const danceTypeData = Object.entries(stats.danceTypeDist || {})
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
@@ -114,33 +107,6 @@ export default function Summary() {
         <SummaryCard icon="⏱️" label="练习时长" value={formatDurationCN(stats.totalDuration)} color="from-dpink-300 to-dpink-400" />
         <SummaryCard icon="🔥" label="连续打卡" value={`${stats.streak}天`} color="from-dpurple-300 to-dpurple-400" />
       </div>
-
-      {/* 分类饼图 */}
-      {categoryData.length > 0 && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
-          <h2 className="text-base font-bold text-gray-800 mb-3">{stats.rangeLabel}分类</h2>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={categoryData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={5} dataKey="value">
-                  {categoryData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                </Pie>
-                <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(v, n) => [`${v} 条`, n]} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex justify-center gap-4 mt-2">
-            {categoryData.map(d => (
-              <div key={d.name} className="flex items-center gap-1.5 text-sm">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
-                <span className="text-gray-600">{d.name}</span>
-                <span className="font-bold text-gray-800">{d.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* 练习趋势 */}
       {trendData.length > 1 && (
@@ -205,7 +171,6 @@ export default function Summary() {
           <h2 className="text-base font-bold text-gray-800 mb-2">📋 {stats.rangeLabel}小结</h2>
           <div className="space-y-1.5 text-sm text-gray-600">
             <p>{stats.rangeLabel}共练习 <strong className="text-gray-800">{stats.practiceDays}</strong> 天，完成 <strong className="text-gray-800">{stats.rangeRecords}</strong> 条记录</p>
-            <p>其中 <span className="text-dpink-400 font-medium">跳得很好</span> {stats.goodCount} 条，<span className="text-dpurple-400 font-medium">还需要努力</span> {stats.needsWorkCount} 条</p>
             {stats.totalDuration > 0 && <p>总练习时长约 <strong className="text-gray-800">{formatDurationCN(stats.totalDuration)}</strong></p>}
             {danceTypeData.length > 0 && <p>最常练习的舞种：<strong className="text-gray-800">{danceTypeData[0]?.name}</strong></p>}
           </div>

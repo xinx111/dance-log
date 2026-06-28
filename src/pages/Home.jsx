@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getRecordsByCategory, getStats } from '../db'
+import { getStats } from '../db'
 import { formatDate } from '../utils/format'
 import GoodIcon from '../components/GoodIcon'
 
 export default function Home() {
   const navigate = useNavigate()
-  const [goodCount, setGoodCount] = useState(0)
-  const [needsWorkCount, setNeedsWorkCount] = useState(0)
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -17,13 +15,7 @@ export default function Home() {
 
   async function loadData() {
     try {
-      const [good, needsWork, statsData] = await Promise.all([
-        getRecordsByCategory('good'),
-        getRecordsByCategory('needs-work'),
-        getStats(),
-      ])
-      setGoodCount(good.length)
-      setNeedsWorkCount(needsWork.length)
+      const statsData = await getStats()
       setStats(statsData)
     } catch (err) {
       console.error('加载数据失败:', err)
@@ -52,7 +44,7 @@ export default function Home() {
         <>
           {/* 跳得很好 - 粉色卡片 */}
           <div
-            onClick={() => navigate('/record?category=good')}
+            onClick={() => navigate('/record')}
             className="relative bg-dpink-200 rounded-3xl p-6 text-white active:scale-[0.98] transition-transform cursor-pointer overflow-hidden shadow-lg shadow-dpink-200/40"
           >
             <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/15 rounded-full" />
@@ -60,30 +52,11 @@ export default function Home() {
             <div className="relative z-10">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/85 text-sm font-medium">跳得很好</p>
-                  <p className="text-5xl font-bold mt-1">{goodCount}</p>
+                  <p className="text-white/85 text-sm font-medium">舞蹈记录</p>
+                  <p className="text-5xl font-bold mt-1">{stats?.totalRecords || 0}</p>
                   <p className="text-white/70 text-xs mt-1">个视频</p>
                 </div>
                 <GoodIcon size={80} />
-              </div>
-            </div>
-          </div>
-
-          {/* 还需要努力 - 紫色卡片 */}
-          <div
-            onClick={() => navigate('/record?category=needs-work')}
-            className="relative bg-dpurple-400 rounded-3xl p-6 text-white active:scale-[0.98] transition-transform cursor-pointer overflow-hidden shadow-lg shadow-dpurple-400/40"
-          >
-            <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/15 rounded-full" />
-            <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-white/8 rounded-full" />
-            <div className="relative z-10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/85 text-sm font-medium">还需要努力</p>
-                  <p className="text-5xl font-bold mt-1">{needsWorkCount}</p>
-                  <p className="text-white/70 text-xs mt-1">个视频</p>
-                </div>
-                <div className="text-6xl">🔥</div>
               </div>
             </div>
           </div>

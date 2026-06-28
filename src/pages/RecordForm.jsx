@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { addRecord, updateRecord, getRecord, DANCE_TYPES } from '../db'
 import { getDateStr } from '../utils/format'
 import { saveVideo, getVideoUri } from '../utils/storage'
-import GoodIcon from '../components/GoodIcon'
 
 export default function RecordForm() {
   const navigate = useNavigate()
@@ -16,7 +15,7 @@ export default function RecordForm() {
     danceType: '',
     date: getDateStr(new Date()),
     duration: 0,
-    category: '',
+    category: 'good',
     notes: '',
   })
   const [videoPreview, setVideoPreview] = useState('')
@@ -44,7 +43,7 @@ export default function RecordForm() {
           danceType: data.danceType || '',
           date: new Date(data.date).toISOString().slice(0, 10),
           duration: data.duration || 0,
-          category: data.category || '',
+          category: 'good',
           notes: data.notes || '',
         })
         // 如果有视频，加载预览
@@ -94,7 +93,6 @@ export default function RecordForm() {
   const handleSave = async () => {
     if (!form.songName.trim()) { alert('请输入歌曲名称'); return }
     if (!form.danceType) { alert('请选择舞种'); return }
-    if (!form.category) { alert('请选择分类'); return }
 
     setSaving(true)
     try {
@@ -220,35 +218,6 @@ export default function RecordForm() {
           </div>
         </div>
 
-        {/* 分类 */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-1.5 block">分区标签</label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => handleChange('category', 'good')}
-              className={`py-4 rounded-2xl border-2 text-center transition-all ${
-                form.category === 'good'
-                  ? 'border-dpink-200 bg-dpink-50 text-dpink-400'
-                  : 'border-gray-100 bg-gray-50 text-gray-500'
-              }`}
-            >
-              <div className="mb-1 flex justify-center"><GoodIcon size={28} /></div>
-              <span className="font-bold text-sm">跳得很好</span>
-            </button>
-            <button
-              onClick={() => handleChange('category', 'needs-work')}
-              className={`py-4 rounded-2xl border-2 text-center transition-all ${
-                form.category === 'needs-work'
-                  ? 'border-dpurple-400 bg-dpurple-50 text-dpurple-400'
-                  : 'border-gray-100 bg-gray-50 text-gray-500'
-              }`}
-            >
-              <div className="text-2xl mb-1">🔥</div>
-              <span className="font-bold text-sm">还需要努力</span>
-            </button>
-          </div>
-        </div>
-
         <div>
           <label className="text-sm font-medium text-gray-700 mb-1.5 block">备注</label>
           <textarea value={form.notes} onChange={e => handleChange('notes', e.target.value)}
@@ -256,7 +225,7 @@ export default function RecordForm() {
         </div>
       </div>
 
-      {/* 保存按钮 - 粉紫渐变 */}
+      {/* 保存按钮 */}
       <div className="px-4 mt-6 pb-8">
         <button
           onClick={handleSave}

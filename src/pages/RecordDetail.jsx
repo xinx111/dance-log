@@ -118,11 +118,11 @@ export default function RecordDetail() {
               </span>
             )}
           </div>
-          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ml-3 ${
-            isGood ? 'bg-dpink-100 text-dpink-400' : 'bg-dpurple-50 text-dpurple-400'
-          }`}>
-            {isGood ? <><GoodIcon size={16} /> 跳得很好</> : '🔥 还需要努力'}
-          </span>
+          {isGood && (
+            <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium ml-3 bg-dpink-100 text-dpink-400">
+              <GoodIcon size={16} /> 跳得很好
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-4 text-sm text-gray-500 border-t border-gray-50 pt-3">
           <div className="flex items-center gap-1.5">
