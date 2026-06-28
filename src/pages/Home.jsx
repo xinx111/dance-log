@@ -95,10 +95,7 @@ export default function Home() {
     <div className="px-5 pt-6 pb-4 space-y-5 animate-fade-in">
       {/* 顶部日期/头像 */}
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 text-sm">{formatDate(new Date(), 'full')}</p>
-          <h1 className="text-2xl font-bold text-gray-800 mt-0.5">舞迹</h1>
-        </div>
+        <p className="text-gray-500 text-sm">{formatDate(new Date(), 'full')}</p>
         <div
           onClick={() => navigate('/profile')}
           className="w-12 h-12 rounded-full overflow-hidden shadow-md cursor-pointer active:scale-90 transition-transform flex-shrink-0"

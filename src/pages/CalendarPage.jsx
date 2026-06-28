@@ -80,7 +80,7 @@ export default function CalendarPage() {
 
   return (
     <div className="px-4 pt-6 pb-4 animate-fade-in">
-      <h1 className="text-2xl font-bold text-gray-800 mb-1">练习日历</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-1">Dance Calendar</h1>
       <p className="text-gray-400 text-sm mb-4">查看你的舞蹈足迹</p>
 
       {/* 总练习天数 */}
