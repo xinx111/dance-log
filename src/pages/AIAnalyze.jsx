@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { AI_API_BASE } from '../utils/config'
+import { updateRecord } from '../db'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer,
@@ -21,13 +22,18 @@ export default function AIAnalyze() {
   const myInputRef = useRef(null)
   const teacherInputRef = useRef(null)
 
-  // 从记录中自动加载已录制的视频
+  // 从记录中自动加载已录制的视频和已有分析结果
   useEffect(() => {
-    async function loadVideo() {
+    async function init() {
+      // 如果已有分析结果，直接显示
+      if (record?.analysisResult) {
+        setResult(record.analysisResult)
+      }
+
+      // 自动加载视频
       if (!record?.videoUrl) return
       try {
         let uri = record.videoUrl
-        // 如果是 Capacitor 存储路径，先解析为可访问 URI
         if (!uri.startsWith('blob:') && !uri.startsWith('http')) {
           const { getVideoUri } = await import('../utils/storage')
           uri = await getVideoUri(uri)
@@ -41,7 +47,7 @@ export default function AIAnalyze() {
         console.error('自动加载视频失败，请手动选择:', err)
       }
     }
-    loadVideo()
+    init()
   }, [record])
 
   async function handleAnalyze() {
@@ -107,6 +113,15 @@ export default function AIAnalyze() {
         }
       } else {
         setResult(data)
+        // 保存分析结果到数据库
+        try {
+          await updateRecord(Number(id), {
+            analysisResult: data,
+            analyzedAt: new Date().toISOString(),
+          })
+        } catch (e) {
+          console.error('保存分析结果失败:', e)
+        }
       }
     } catch (err) {
       if (err.name === 'AbortError') {

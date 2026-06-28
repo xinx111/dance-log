@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getRecord, deleteRecord } from '../db'
 import { formatDate, formatDuration } from '../utils/format'
 import { getVideoUri, deleteVideoFile } from '../utils/storage'
-import GoodIcon from '../components/GoodIcon'
 
 export default function RecordDetail() {
   const { id } = useParams()
@@ -61,8 +60,6 @@ export default function RecordDetail() {
     )
   }
 
-  const isGood = record.category === 'good'
-
   return (
     <div className="px-4 pt-6 pb-4 animate-fade-in">
       {/* 顶部导航 */}
@@ -118,11 +115,6 @@ export default function RecordDetail() {
               </span>
             )}
           </div>
-          {isGood && (
-            <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium ml-3 bg-dpink-100 text-dpink-400">
-              <GoodIcon size={16} /> 跳得很好
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-4 text-sm text-gray-500 border-t border-gray-50 pt-3">
           <div className="flex items-center gap-1.5">
@@ -150,6 +142,35 @@ export default function RecordDetail() {
         </div>
       )}
 
+      {/* 已有分析结果 */}
+      {record.analysisResult && (
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4 text-dpink-400">
+                <path d="M12 2l2.4 7.2L22 9l-6 4.8L17.6 22 12 17l-5.6 5L8 13.8 2 9l7.6-.2z" />
+              </svg>
+              AI 分析结果
+            </h3>
+            <span className="text-lg font-bold text-dpink-400">{record.analysisResult.totalScore}</span>
+          </div>
+          {record.analysisResult.dimensions && (
+            <div className="flex items-center justify-around text-center border-t border-gray-50 pt-3">
+              <DimItem label="控制力" score={record.analysisResult.dimensions.control} />
+              <DimItem label="姿态" score={record.analysisResult.dimensions.posture} />
+              <DimItem label="流畅度" score={record.analysisResult.dimensions.flow} />
+              <DimItem label="节奏感" score={record.analysisResult.dimensions.rhythm} />
+              <DimItem label="表现力" score={record.analysisResult.dimensions.expression} />
+            </div>
+          )}
+          {record.analyzedAt && (
+            <p className="text-[10px] text-gray-400 text-center mt-2">
+              分析于 {formatDate(record.analyzedAt)}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* AI 分析按钮 */}
       <button
         onClick={() => navigate(`/record/${id}/analyze`, { state: { record } })}
@@ -158,7 +179,7 @@ export default function RecordDetail() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-5 h-5">
           <path d="M12 2l2.4 7.2L22 9l-6 4.8L17.6 22 12 17l-5.6 5L8 13.8 2 9l7.6-.2z" />
         </svg>
-        AI 动作分析
+        {record.analysisResult ? '重新分析' : 'AI 动作分析'}
       </button>
 
       <div className="text-center text-xs text-gray-400 mt-6">
@@ -187,6 +208,15 @@ export default function RecordDetail() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function DimItem({ label, score }) {
+  return (
+    <div className="text-center">
+      <div className="text-sm font-bold text-dpink-400">{score}</div>
+      <div className="text-[10px] text-gray-400">{label}</div>
     </div>
   )
 }
