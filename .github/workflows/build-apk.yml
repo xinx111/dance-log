@@ -32,33 +32,14 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Add Android platform
-        run: npx cap add android
-
       - name: Sync Capacitor
-        run: npx cap sync android
-
-      - name: Bump version
-        run: |
-          BUILD_NUM=$(date +%Y%m%d%H%M)
-          sed -i "s/versionCode 1/versionCode $BUILD_NUM/" android/app/build.gradle
-          sed -i "s/versionName \"1.0\"/versionName \"1.0.$BUILD_NUM\"/" android/app/build.gradle
+        run: npx cap sync
 
       - name: Build APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-
-      - name: Sign APK
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
-          jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
-            -keystore keystore.jks \
-            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
-            -keypass "${{ secrets.KEY_PASSWORD }}" \
-            android/app/build/outputs/apk/debug/app-debug.apk \
-            "${{ secrets.KEY_ALIAS }}"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
