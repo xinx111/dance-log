@@ -123,7 +123,6 @@ export default function Profile() {
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold text-gray-800">{profile.name}</h2>
           {profile.signature && <p className="text-gray-400 text-xs mt-0.5">{profile.signature}</p>}
-          <p className="text-gray-400 text-xs mt-0.5">点击编辑资料</p>
         </div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-gray-300">
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
