@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { AI_API_BASE } from '../utils/config'
 import {
@@ -20,6 +20,29 @@ export default function AIAnalyze() {
   const [error, setError] = useState('')
   const myInputRef = useRef(null)
   const teacherInputRef = useRef(null)
+
+  // 从记录中自动加载已录制的视频
+  useEffect(() => {
+    async function loadVideo() {
+      if (!record?.videoUrl) return
+      try {
+        let uri = record.videoUrl
+        // 如果是 Capacitor 存储路径，先解析为可访问 URI
+        if (!uri.startsWith('blob:') && !uri.startsWith('http')) {
+          const { getVideoUri } = await import('../utils/storage')
+          uri = await getVideoUri(uri)
+        }
+        const response = await fetch(uri)
+        const blob = await response.blob()
+        const ext = blob.type.includes('mp4') ? 'mp4' : 'mov'
+        const file = new File([blob], `dance.${ext}`, { type: blob.type })
+        setMyFile(file)
+      } catch (err) {
+        console.error('自动加载视频失败，请手动选择:', err)
+      }
+    }
+    loadVideo()
+  }, [record])
 
   async function handleAnalyze() {
     if (!myFile) { alert('请选择你的舞蹈视频'); return }
@@ -145,7 +168,7 @@ export default function AIAnalyze() {
 
       {/* 视频选择 */}
       <div className="space-y-3 mb-5">
-        {/* 我的视频 */}
+        {/* 我的视频 — 已自动加载，可点击换源 */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
           <label className="text-sm font-medium text-gray-700 mb-2 block">我的舞蹈视频</label>
           <div
@@ -155,7 +178,7 @@ export default function AIAnalyze() {
             {myFile ? (
               <div>
                 <div className="text-sm text-dpink-500 font-medium">{myFile.name}</div>
-                <div className="text-xs text-gray-400 mt-0.5">{(myFile.size / 1024 / 1024).toFixed(1)} MB</div>
+                <div className="text-xs text-gray-400 mt-0.5">{(myFile.size / 1024 / 1024).toFixed(1)} MB · 点击更换</div>
               </div>
             ) : (
               <div>
