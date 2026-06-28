@@ -26,8 +26,8 @@ export default function AIAnalyze() {
   useEffect(() => {
     async function init() {
       // 如果已有分析结果，直接显示
-      if (record?.analysisResult) {
-        setResult(record.analysisResult)
+      if (record?.analysisResults?.[mode]) {
+        setResult(record.analysisResults[mode])
       }
 
       // 自动加载视频
@@ -48,7 +48,7 @@ export default function AIAnalyze() {
       }
     }
     init()
-  }, [record])
+  }, [record, mode])
 
   async function handleAnalyze() {
     if (!myFile) { alert('请选择你的舞蹈视频'); return }
@@ -116,10 +116,14 @@ export default function AIAnalyze() {
         }
       } else {
         setResult(data)
-        // 保存分析结果到数据库
+        // 保存分析结果到数据库（按模式区分，互不覆盖）
         try {
+          const existingResults = record?.analysisResults || {}
           await updateRecord(Number(id), {
-            analysisResult: data,
+            analysisResults: {
+              ...existingResults,
+              [mode]: data,
+            },
             analyzedAt: new Date().toISOString(),
           })
         } catch (e) {

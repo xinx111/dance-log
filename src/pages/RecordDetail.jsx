@@ -143,30 +143,13 @@ export default function RecordDetail() {
       )}
 
       {/* 已有分析结果 */}
-      {record.analysisResult && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4 text-dpink-400">
-                <path d="M12 2l2.4 7.2L22 9l-6 4.8L17.6 22 12 17l-5.6 5L8 13.8 2 9l7.6-.2z" />
-              </svg>
-              AI 分析结果
-            </h3>
-            <span className="text-lg font-bold text-dpink-400">{record.analysisResult.totalScore}</span>
-          </div>
-          {record.analysisResult.dimensions && (
-            <div className="flex items-center justify-around text-center border-t border-gray-50 pt-3">
-              <DimItem label="控制力" score={record.analysisResult.dimensions.control} />
-              <DimItem label="姿态" score={record.analysisResult.dimensions.posture} />
-              <DimItem label="流畅度" score={record.analysisResult.dimensions.flow} />
-              <DimItem label="节奏感" score={record.analysisResult.dimensions.rhythm} />
-              <DimItem label="表现力" score={record.analysisResult.dimensions.expression} />
-            </div>
+      {record.analysisResults && (
+        <div className="space-y-3 mb-4">
+          {record.analysisResults.single && (
+            <AnalysisCard title="独立点评" result={record.analysisResults.single} analyzedAt={record.analyzedAt} />
           )}
-          {record.analyzedAt && (
-            <p className="text-[10px] text-gray-400 text-center mt-2">
-              分析于 {formatDate(record.analyzedAt)}
-            </p>
+          {record.analysisResults.compare && (
+            <AnalysisCard title="对比分析" result={record.analysisResults.compare} analyzedAt={record.analyzedAt} />
           )}
         </div>
       )}
@@ -179,7 +162,7 @@ export default function RecordDetail() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-5 h-5">
           <path d="M12 2l2.4 7.2L22 9l-6 4.8L17.6 22 12 17l-5.6 5L8 13.8 2 9l7.6-.2z" />
         </svg>
-        {record.analysisResult ? '重新分析' : 'AI 动作分析'}
+        AI 动作分析
       </button>
 
       <div className="text-center text-xs text-gray-400 mt-6">
@@ -207,6 +190,34 @@ export default function RecordDetail() {
             </div>
           </div>
         </div>
+      )}
+    </div>
+  )
+}
+
+function AnalysisCard({ title, result, analyzedAt }) {
+  return (
+    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4 text-dpink-400">
+            <path d="M12 2l2.4 7.2L22 9l-6 4.8L17.6 22 12 17l-5.6 5L8 13.8 2 9l7.6-.2z" />
+          </svg>
+          {title}
+        </h3>
+        <span className="text-lg font-bold text-dpink-400">{result.totalScore}</span>
+      </div>
+      {result.dimensions && (
+        <div className="flex items-center justify-around text-center border-t border-gray-50 pt-3">
+          <DimItem label="控制力" score={result.dimensions.control} />
+          <DimItem label="姿态" score={result.dimensions.posture} />
+          <DimItem label="流畅度" score={result.dimensions.flow} />
+          <DimItem label="节奏感" score={result.dimensions.rhythm} />
+          <DimItem label="表现力" score={result.dimensions.expression} />
+        </div>
+      )}
+      {analyzedAt && (
+        <p className="text-[10px] text-gray-400 text-center mt-2">分析于 {formatDate(analyzedAt)}</p>
       )}
     </div>
   )
