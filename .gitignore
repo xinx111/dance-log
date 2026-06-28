@@ -3,5 +3,6 @@ dist
 .capability
 ios
 *.local
+local.properties
 .DS_Store
 *.log

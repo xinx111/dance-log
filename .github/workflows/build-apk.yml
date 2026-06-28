@@ -25,6 +25,8 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          target-sdk: 34
 
       - name: Install dependencies
         run: npm install
@@ -32,8 +34,8 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Sync Capacitor
-        run: npx cap sync
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 
       - name: Bump version
         run: |
@@ -47,7 +49,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Sign APK
+      - name: Sign APK (if keystore configured)
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
