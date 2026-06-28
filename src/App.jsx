@@ -13,7 +13,6 @@ import AIAnalyze from './pages/AIAnalyze'
 const pages = [
   { path: '/', name: '首页', icon: HomeIcon },
   { path: '/calendar', name: '日历', icon: CalendarIcon },
-  { path: '/summary', name: '总结', icon: ChartIcon },
   { path: '/profile', name: '我的', icon: ProfileIcon },
 ]
 
@@ -21,7 +20,7 @@ function AppContent() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const tabPaths = ['/', '/calendar', '/summary', '/profile']
+  const tabPaths = ['/', '/calendar', '/profile']
   const showNav = tabPaths.includes(location.pathname)
 
   return (
@@ -104,26 +103,6 @@ function CalendarIcon({ active }) {
       {active && <circle cx={14} cy={13.5} r={1} fill="white" />}
       {active && <circle cx={10} cy={18} r={1} fill="white" />}
       {active && <circle cx={18} cy={18} r={1} fill="white" />}
-    </svg>
-  )
-}
-
-function ChartIcon({ active }) {
-  return (
-    <svg viewBox="0 0 28 28" fill="none" className="w-6 h-6">
-      {/* 小苗苗 + 星星趋势 */}
-      <path d="M4 23L10 15L14 19L20 9L24 13"
-        stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
-      {/* 小苗苗叶子 */}
-      <path d="M20 9C20 9 22 6 24 4"
-        stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" opacity={0.6} />
-      <path d="M20 9C20 9 23 8 25 7"
-        stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" opacity={0.4} />
-      {/* 星星 */}
-      {active && (
-        <path d="M22 4L22.5 5.5L24 6L22.5 6.5L22 8L21.5 6.5L20 6L21.5 5.5Z"
-          fill="currentColor" />
-      )}
     </svg>
   )
 }
