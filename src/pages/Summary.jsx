@@ -5,6 +5,10 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer,
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip
 } from 'recharts'
+import RecordsIcon from '../components/RecordsIcon'
+import DurationIcon from '../components/DurationIcon'
+import MailIcon from '../components/MailIcon'
+import StreakIcon from '../components/StreakIcon'
 
 const CHART_COLORS = ['#FFB6C1', '#8E7DFE', '#FF8FA3', '#A78BFA', '#22C55E', '#C4B0FF', '#F59E0B', '#F43F5E']
 const RANGES = [
@@ -102,10 +106,10 @@ export default function Summary() {
 
       {/* 概览卡片 */}
       <div className="grid grid-cols-2 gap-3">
-        <SummaryCard icon="📝" label="总记录" value={`${stats.totalRecords}`} color="from-dpink-200 to-dpink-300" />
-        <SummaryCard icon="📅" label={`${stats.rangeLabel}练习`} value={`${stats.practiceDays}天`} color="from-dpurple-400 to-dpurple-500" />
-        <SummaryCard icon="⏱️" label="练习时长" value={formatDurationCN(stats.totalDuration)} color="from-dpink-300 to-dpink-400" />
-        <SummaryCard icon="🔥" label="连续打卡" value={`${stats.streak}天`} color="from-dpurple-300 to-dpurple-400" />
+        <SummaryCard icon={<RecordsIcon size={24} />} label="总记录" value={`${stats.totalRecords}`} color="from-dpink-200 to-dpink-300" />
+        <SummaryCard icon={<MailIcon size={24} />} label={`${stats.rangeLabel}练习`} value={`${stats.practiceDays}天`} color="from-dpurple-400 to-dpurple-500" />
+        <SummaryCard icon={<DurationIcon size={24} />} label="练习时长" value={formatDurationCN(stats.totalDuration)} color="from-dpink-300 to-dpink-400" />
+        <SummaryCard icon={<StreakIcon size={24} />} label="连续打卡" value={`${stats.streak}天`} color="from-dpurple-300 to-dpurple-400" />
       </div>
 
       {/* 练习趋势 */}
@@ -185,7 +189,7 @@ export default function Summary() {
 function SummaryCard({ icon, label, value, color }) {
   return (
     <div className={`bg-gradient-to-br ${color} rounded-2xl p-4 text-white shadow-lg`}>
-      <div className="text-2xl mb-1">{icon}</div>
+      <div className={`mb-1 ${typeof icon === 'string' ? 'text-2xl' : ''}`}>{icon}</div>
       <p className="text-white/80 text-xs">{label}</p>
       <p className="text-lg font-bold mt-0.5 leading-tight">{value}</p>
     </div>

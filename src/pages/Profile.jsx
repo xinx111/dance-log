@@ -3,10 +3,13 @@ import { getStats, getUserProfile, saveUserProfile, clearAllRecords, getStorageS
 import { exportData, importData, getLastBackupTime } from '../utils/sync'
 import { formatDate } from '../utils/format'
 import DefaultAvatar from '../components/DefaultAvatar'
+import BackupIcon from '../components/BackupIcon'
+import DeleteIcon from '../components/DeleteIcon'
+import StorageIcon from '../components/StorageIcon'
 
 export default function Profile() {
   const [stats, setStats] = useState(null)
-  const [profile, setProfile] = useState({ name: '舞者', avatar: '' })
+  const [profile, setProfile] = useState({ name: 'xin', avatar: '' })
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState('')
   const [editAvatar, setEditAvatar] = useState('')
@@ -44,7 +47,7 @@ export default function Profile() {
 
   async function saveEdit() {
     const newProfile = {
-      name: editName.trim() || '舞者',
+      name: editName.trim() || 'xin',
       avatar: editAvatar,
     }
     await saveUserProfile(newProfile)
@@ -202,7 +205,7 @@ export default function Profile() {
       {/* 存储状态 */}
       {storageStats && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">📦 存储状态</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-1.5"><StorageIcon size={18} /> 存储状态</h3>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
               <p className="text-2xl font-bold text-dpink-400">
@@ -237,8 +240,8 @@ export default function Profile() {
       {/* 数据管理 */}
       <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 space-y-1">
         <h3 className="text-sm font-medium text-gray-500 mb-2">数据管理</h3>
-        <MenuItem icon="📤" label="导出备份" sub={lastBackup ? `上次备份: ${formatDate(lastBackup)}` : '尚未备份'} onClick={handleExport} loading={exporting} />
-        <MenuItem icon="📥" label="导入备份" sub="从备份文件恢复数据" onClick={() => fileInputRef.current?.click()} loading={importing} />
+        <MenuItem icon={<BackupIcon size={20} />} label="导出备份" sub={lastBackup ? `上次备份: ${formatDate(lastBackup)}` : '尚未备份'} onClick={handleExport} loading={exporting} />
+        <MenuItem icon={<BackupIcon size={20} className="-scale-x-100" />} label="导入备份" sub="从备份文件恢复数据" onClick={() => fileInputRef.current?.click()} loading={importing} />
         <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
         {importResult && (
           <div className={`mt-2 text-sm px-3 py-2 rounded-lg ${
@@ -251,7 +254,7 @@ export default function Profile() {
         <div className="border-t border-gray-50 pt-2 mt-2">
           <button onClick={() => setShowClearConfirm(true)}
             className="w-full flex items-center gap-3 py-3 rounded-xl px-2 -mx-2 transition-colors text-red-500 active:bg-red-50">
-            <div className="text-xl w-8 text-center">🗑️</div>
+            <div className="w-8 flex items-center justify-center"><DeleteIcon size={20} /></div>
             <div className="flex-1 text-left">
               <p className="font-medium text-sm">清除所有数据</p>
               <p className="text-xs text-gray-400">删除全部舞蹈记录，不可恢复</p>
@@ -323,7 +326,7 @@ function MenuItem({ icon, label, sub, onClick, loading }) {
   return (
     <button onClick={onClick} disabled={loading}
       className="w-full flex items-center gap-3 py-3 active:bg-gray-50 rounded-xl px-2 -mx-2 transition-colors">
-      <div className="text-xl w-8 text-center">{icon}</div>
+      <div className="w-8 flex items-center justify-center">{icon}</div>
       <div className="flex-1 text-left">
         <p className="font-medium text-gray-800 text-sm">{label}</p>
         {sub && <p className="text-xs text-gray-400">{sub}</p>}
