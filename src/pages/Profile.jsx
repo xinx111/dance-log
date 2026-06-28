@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { getStats, getUserProfile, saveUserProfile, clearAllRecords, getStorageStats } from '../db'
 import { exportData, importData, getLastBackupTime } from '../utils/sync'
 import { formatDate } from '../utils/format'
+import DefaultAvatar from '../components/DefaultAvatar'
 
 export default function Profile() {
   const [stats, setStats] = useState(null)
@@ -98,7 +99,7 @@ export default function Profile() {
 
   const avatarContent = profile.avatar
     ? <img src={profile.avatar} alt="头像" className="w-full h-full rounded-full object-cover" />
-    : <span className="text-white text-2xl font-bold">{profile.name[0]}</span>
+    : <DefaultAvatar className="w-full h-full" />
 
   return (
     <div className="px-4 pt-6 pb-4 space-y-5 animate-fade-in">
@@ -137,7 +138,7 @@ export default function Profile() {
               >
                 {editAvatar
                   ? <img src={editAvatar} alt="头像" className="w-full h-full rounded-full object-cover" />
-                  : <span className="text-white text-3xl font-bold">{editName ? editName[0] : '舞'}</span>
+                  : <DefaultAvatar className="w-full h-full" />
                 }
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
                   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-6 h-6">

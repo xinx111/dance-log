@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getStats } from '../db'
 import { formatDate } from '../utils/format'
 import GoodIcon from '../components/GoodIcon'
+import DefaultAvatar from '../components/DefaultAvatar'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -30,9 +31,9 @@ export default function Home() {
         <p className="text-gray-500 text-sm">{formatDate(new Date(), 'full')}</p>
         <div
           onClick={() => navigate('/profile')}
-          className="w-12 h-12 rounded-full bg-gradient-to-br from-dpink-300 to-dpurple-400 flex items-center justify-center text-white text-lg font-bold shadow-md overflow-hidden cursor-pointer active:scale-90 transition-transform flex-shrink-0"
+          className="w-12 h-12 rounded-full overflow-hidden shadow-md cursor-pointer active:scale-90 transition-transform flex-shrink-0"
         >
-          舞
+          <DefaultAvatar className="w-full h-full" />
         </div>
       </div>
 
