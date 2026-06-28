@@ -70,9 +70,12 @@ export default function AIAnalyze() {
     // API Key 从环境变量读取，前端不传
     const endpoint = mode === 'single' ? '/analyze/single' : '/analyze'
 
+    // 对比分析需要更长的超时时间
+    const timeoutMs = mode === 'compare' ? 300000 : 120000
+
     try {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 120000)
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
       const res = await fetch(`${AI_API_BASE}${endpoint}`, {
         method: 'POST',
