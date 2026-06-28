@@ -206,7 +206,7 @@ const USER_PROFILE_KEY = 'user_profile'
 
 export async function getUserProfile() {
   const profile = await getSetting(USER_PROFILE_KEY)
-  return profile || { name: 'xin', avatar: '' }
+  return profile || { name: 'xin', avatar: '', signature: '' }
 }
 
 export async function saveUserProfile(profile) {

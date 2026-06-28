@@ -9,10 +9,11 @@ import StorageIcon from '../components/StorageIcon'
 
 export default function Profile() {
   const [stats, setStats] = useState(null)
-  const [profile, setProfile] = useState({ name: 'xin', avatar: '' })
+  const [profile, setProfile] = useState({ name: 'xin', avatar: '', signature: '' })
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState('')
   const [editAvatar, setEditAvatar] = useState('')
+  const [editSignature, setEditSignature] = useState('')
   const [lastBackup, setLastBackup] = useState(null)
   const [storageStats, setStorageStats] = useState(null)
   const [importing, setImporting] = useState(false)
@@ -42,6 +43,7 @@ export default function Profile() {
   function startEdit() {
     setEditName(profile.name)
     setEditAvatar(profile.avatar)
+    setEditSignature(profile.signature || '')
     setEditing(true)
   }
 
@@ -49,6 +51,7 @@ export default function Profile() {
     const newProfile = {
       name: editName.trim() || 'xin',
       avatar: editAvatar,
+      signature: editSignature.trim(),
     }
     await saveUserProfile(newProfile)
     setProfile(newProfile)
@@ -119,7 +122,8 @@ export default function Profile() {
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold text-gray-800">{profile.name}</h2>
-          <p className="text-gray-400 text-sm">舞迹 DanceLog · 点击编辑资料</p>
+          {profile.signature && <p className="text-gray-400 text-xs mt-0.5">{profile.signature}</p>}
+          <p className="text-gray-400 text-xs mt-0.5">点击编辑资料</p>
         </div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-gray-300">
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
@@ -155,7 +159,7 @@ export default function Profile() {
             </div>
 
             {/* 昵称 */}
-            <div className="mb-4">
+            <div className="mb-3">
               <label className="text-sm font-medium text-gray-700 mb-1.5 block">昵称</label>
               <input
                 type="text"
@@ -164,6 +168,19 @@ export default function Profile() {
                 placeholder="输入你的昵称"
                 className="input-field"
                 maxLength={20}
+              />
+            </div>
+
+            {/* 签名 */}
+            <div className="mb-4">
+              <label className="text-sm font-medium text-gray-700 mb-1.5 block">签名</label>
+              <input
+                type="text"
+                value={editSignature}
+                onChange={e => setEditSignature(e.target.value)}
+                placeholder="写一句话吧～"
+                className="input-field"
+                maxLength={50}
               />
             </div>
 
