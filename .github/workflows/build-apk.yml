@@ -32,14 +32,8 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Sync Capacitor (generate bridge files)
-        run: npx cap sync
-
       - name: Create local.properties
-        run: |
-          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          ls $ANDROID_HOME/platforms/
+        run: echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 
       - name: Bump version
         run: |
